@@ -2,18 +2,18 @@
 
 ## Purpose
 
-This document records what Needle's current source material actually contains before any application model or UI is built around it.
+This document records what Needle's source material actually contains before application code is built around it.
 
 Sources reviewed:
 
-- Spotify extended streaming-history JSON files committed at the repository root, spanning files named from 2011 through 2026 with split files in several years;
+- Spotify extended streaming-history JSON files spanning 2011 through 2026, with split files in several years;
 - `spotify_album_history_analysis.xlsx`, the prior album/session analysis workbook.
 
-The workbook is a derived analysis product. The raw Spotify export remains the source for playback events.
+The real source files are private ingestion material and belong locally under `data/history/`. They are not application assets and are not tracked on the Phase 0 branch.
 
 ## Raw Spotify event shape
 
-Observed audio-history records contain fields including:
+Observed audio-history records include fields such as:
 
 - `ts`
 - `platform`
@@ -24,10 +24,8 @@ Observed audio-history records contain fields including:
 - `master_metadata_album_artist_name`
 - `master_metadata_album_album_name`
 - `spotify_track_uri`
-- podcast/episode fields
-- audiobook fields
-- `reason_start`
-- `reason_end`
+- podcast/episode and audiobook fields
+- `reason_start` / `reason_end`
 - `shuffle`
 - `skipped`
 - `offline`
@@ -36,15 +34,13 @@ Observed audio-history records contain fields including:
 
 ### Consequence
 
-The raw export contains personally identifying/sensitive operational metadata that Needle does not need in its application database, particularly IP address and detailed device/platform history.
+The source export contains personal operational metadata Needle does not need in its application database, particularly IP address and detailed device/platform history.
 
-The ingestion pipeline should whitelist required fields rather than copying raw rows wholesale.
+The ingestion pipeline must whitelist required fields rather than copying raw rows wholesale.
 
 ## Prior analysis workbook
 
 ### Sheets
-
-The workbook contains:
 
 - **Summary**
 - **Confirmed Twice**
@@ -55,7 +51,7 @@ The workbook contains:
 
 ### Album candidate results
 
-The prior analysis reviewed **402 album candidates**.
+The analysis reviewed **402 album candidates**.
 
 | Classification | Albums |
 | --- | ---: |
@@ -66,13 +62,11 @@ The prior analysis reviewed **402 album candidates**.
 | Review-other | 16 |
 | **Total** | **402** |
 
-Important: 402 is the analysis candidate set, not necessarily every album title ever present in any raw track-play row.
+402 is the analysis candidate set, not necessarily every album title ever present in a raw playback row.
 
 ### Session reconstruction
 
 The workbook contains **2,012 derived session-detail rows**.
-
-Workbook session classifications:
 
 | Session status | Sessions |
 | --- | ---: |
@@ -82,26 +76,11 @@ Workbook session classifications:
 | Review | 278 |
 | **Total** | **2,012** |
 
-The workbook's session logic is materially useful to Needle because it attempts to distinguish listening to an album as an album from isolated track playback.
-
-The analysis describes the matching rule as using canonical full-album track signatures and requiring observed session coverage of a standard full-album signature for a complete-session classification.
+This is materially useful to Needle because it distinguishes album-level listening evidence from isolated track playback.
 
 ### Catalog resolution
 
-`Catalog Matches` contains all 402 album candidates and stores Spotify-grounded catalog information including:
-
-- selected edition name;
-- `spotify_album_id`;
-- standard release name/date;
-- standard track count;
-- observed tracks;
-- missing tracks;
-- standard-track coverage;
-- match confidence;
-- edition ambiguity;
-- review reason/status.
-
-Catalog resolution status:
+`Catalog Matches` contains all 402 album candidates and stores Spotify-grounded catalog information such as selected edition, Spotify album ID, release date, standard track count, observed/missing tracks, coverage, confidence, and edition ambiguity.
 
 | Status | Albums |
 | --- | ---: |
@@ -109,20 +88,20 @@ Catalog resolution status:
 | Needs review | 53 |
 | **Total** | **402** |
 
-Match-confidence distribution among the candidate set:
+Match confidence:
 
 - high: 143
 - medium: 206
-- none/unresolved: 53
+- unresolved: 53
 
-Edition ambiguity is significant and must be modeled rather than discarded. The catalog data includes cases where standard, deluxe, remastered, re-recorded, compilation, or single-release identities can overlap.
+Edition ambiguity must remain explicit. Standard, deluxe, remastered, reissued, compilation, single-release, and re-recorded identities cannot safely be flattened by album-title strings alone.
 
-## Fields available for the product
+## Fields already supported
 
-The existing analysis already gives Needle strong support for:
+The current history/analysis gives Needle strong support for:
 
-- album/artist names;
-- Spotify album identifiers for resolved candidates;
+- album and artist names;
+- Spotify album IDs for resolved candidates;
 - release dates;
 - expected track counts;
 - first/last listening evidence;
@@ -130,64 +109,65 @@ The existing analysis already gives Needle strong support for:
 - session timing and duration;
 - track coverage;
 - album-level play/time totals;
-- match confidence and edition ambiguity.
+- catalog confidence and edition ambiguity.
 
-## Fields NOT currently supplied by the workbook
-
-Needle still needs enrichment or new app data for:
+## Fields still requiring enrichment or app state
 
 - album artwork;
 - Music Type;
 - detailed genre taxonomy;
 - country/origin if desired;
-- user rating;
+- personal rating, if later added;
 - Favorite/Revisit state;
 - personal notes;
-- manually corrected canonical metadata where catalog review remains unresolved.
+- manual corrections for unresolved catalog records.
 
-Artwork and Spotify album links can be derived/enriched once album identity is resolved. Music Type and Genre require an explicit enrichment/taxonomy step; they should not be guessed in UI code.
+Artwork and Spotify links can be enriched after album identity is resolved. Music Type and Genre need a documented enrichment/taxonomy step and must not be guessed independently in UI code.
 
-## Date anomaly requiring verification
+## Date-range verification — resolved
 
-The workbook reports an earliest derived session corresponding to approximately **2012-07-27 12:30 UTC** and a latest derived session corresponding to approximately **2026-10-25 13:00 UTC**.
+The initial Phase 0 audit incorrectly reported a future-dated session in October 2026. That was **an audit conversion error**, not a future listening event in the workbook.
 
-The latter is later than the current project date (2026-08-25). Treat it as an **audit anomaly**, not valid history, until checked against the underlying raw record(s) and date-conversion logic.
+Direct inspection of the `Session Details` sheet shows:
 
-Possible causes to investigate include:
+- earliest `session_start_utc` Excel serial: `41093.77563923611` → **2012-07-03 18:36:55 UTC**;
+- latest `session_start_utc` Excel serial: `46257.71521388889` → **2026-08-23 17:09:54 UTC**.
 
-- malformed or future-dated source event;
-- workbook/date-serial conversion issue;
-- analysis artifact;
-- unexpected source data.
+The latest row is album rank 375, **Petey USA — `oooo`**, session 2. It is before the project date of 2026-08-25.
 
-No editorial feature should use future-dated history until this is resolved.
+There is therefore **no future-date blocker** in the current analysis workbook. The importer should still validate/quarantine impossible future timestamps as a general safety rule.
 
-## Privacy / repository blocker
+## Private source-data location
 
-The repository is currently public while the raw export is committed.
+Accepted local layout:
 
-Before broader development/sharing, one of these must happen:
+```text
+data/history/
+├── Streaming_History_Audio_*.json
+└── spotify_album_history_analysis.xlsx
+```
 
-1. make the repository private; or
-2. remove raw source files and purge them from Git history, then ingest them from a local/private location.
+Everything in `data/history/` is Git-ignored except its README. The Phase 0 branch no longer tracks either the raw JSON export or the analysis workbook.
 
-A `.gitignore` rule alone does not remove already committed data.
+### Historical exposure caveat
+
+The source files were previously committed while the repository was public. Removing them from the current branch and adding `.gitignore` prevents future tracking, but older Git commits may still contain the files. A separate Git-history rewrite/private-repo remediation is required if historical removal is desired.
 
 ## What the audit changes in the product plan
 
-1. Needle should preserve **evidence/classification**, not merely a boolean `listened` flag.
-2. Canonical album identity must be separate from a specific Spotify edition.
-3. All candidate rows should be retained during import even if the default Library later hides sparse/unresolved records.
-4. The UI inclusion rule for “in my archive” must be a product decision independent of ingestion.
-5. Genre/Music Type enrichment is a real Phase 1 workstream, not existing source data.
-6. Raw playback fields should be minimized before persistence.
-7. The 53 catalog-review candidates need an explicit review path or fallback behavior.
+1. Preserve **evidence/classification**, not merely a boolean `listened` flag.
+2. Keep canonical Album separate from Spotify AlbumEdition.
+3. Preserve all usable candidate evidence during import even if Library hides weak records by default.
+4. Decide Library membership independently from ingestion.
+5. Treat Genre/Music Type enrichment as a real workstream.
+6. Minimize raw playback fields before persistence.
+7. Give the 53 catalog-review candidates an explicit review/fallback path.
 
 ## Phase 0 data questions still open
 
-- What exact evidence threshold determines default Library membership?
-- How should near-complete sessions be presented versus full sessions?
-- How should deluxe/remaster/re-recorded editions collapse or remain separate in the UI?
-- What enrichment source will provide artwork and genre data?
+- What evidence threshold determines default Library membership?
+- How should near-complete sessions appear versus full sessions?
+- How should deluxe/remaster/re-recorded editions collapse or remain separate in UI?
+- What enrichment source provides artwork and genre data?
 - What is the canonical Music Type taxonomy?
-- What caused the future-dated derived session?
+- What historical Git/privacy remediation, if any, should be done for the already-public source commits?
