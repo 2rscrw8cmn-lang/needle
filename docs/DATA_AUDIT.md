@@ -9,7 +9,7 @@ Sources reviewed:
 - Spotify extended streaming-history JSON files spanning 2011 through 2026, with split files in several years;
 - `spotify_album_history_analysis.xlsx`, the prior album/session analysis workbook.
 
-The real source files are private ingestion material and belong locally under `data/history/`. They are not application assets and are not tracked on the Phase 0 branch.
+The real source files are private ingestion material and belong locally under `data/history/`. They are not application assets and are not tracked in Git.
 
 ## Raw Spotify event shape
 
@@ -78,42 +78,61 @@ The workbook contains **2,012 derived session-detail rows**.
 
 This is materially useful to Needle because it distinguishes album-level listening evidence from isolated track playback.
 
-### Catalog resolution
+### Catalog resolution — corrected audit
 
-`Catalog Matches` contains all 402 album candidates and stores Spotify-grounded catalog information such as selected edition, Spotify album ID, release date, standard track count, observed/missing tracks, coverage, confidence, and edition ambiguity.
+Direct inspection during Issue 1.04 confirmed that the workbook's `Catalog Matches` sheet is **MusicBrainz-grounded**, not Spotify-grounded. It contains fields such as `release_group_id`, `selected_release_id`, and MusicBrainz source URLs. The workbook remains useful as a calibration/reference implementation, but Needle does not depend on those MusicBrainz IDs at runtime.
 
-| Status | Albums |
+The current 402 workbook catalog rows break down as:
+
+| Workbook match status | Albums |
 | --- | ---: |
-| Matched | 349 |
-| Needs review | 53 |
+| `matched_standard_release` | 349 |
+| `needs_match_review` | 41 |
+| `matched_but_edition_ambiguous` | 11 |
+| `matched_nonofficial_catalog_release` | 1 |
 | **Total** | **402** |
 
-Match confidence:
+Needle therefore treats **349** as the workbook's accepted standard-release reference and **53** as the review reference (41 + 11 + 1).
 
-- high: 143
-- medium: 206
-- unresolved: 53
+Current workbook `match_confidence` values are:
+
+- high: 361
+- none: 41
+
+Current explicit `edition_ambiguity` values are:
+
+- yes: 11
+- no: 391
+
+Earlier audit notes describing 143 high / 206 medium / 53 unresolved confidence and Spotify album IDs were stale and should not be used as implementation targets.
 
 Edition ambiguity must remain explicit. Standard, deluxe, remastered, reissued, compilation, single-release, and re-recorded identities cannot safely be flattened by album-title strings alone.
 
-## Fields already supported
+### Needle runtime catalog source
+
+Per D-015, Spotify is Needle's primary V1 runtime catalog provider. Issue 1.04 resolves canonical Album vs Spotify AlbumEdition identity directly against Spotify using observed Spotify track identity, catalog search, artist/title evidence, and track-list overlap. The workbook is calibration only and is **not required for another listener's import**.
+
+## Fields already supported by source history/workbook
 
 The current history/analysis gives Needle strong support for:
 
-- album and artist names;
-- Spotify album IDs for resolved candidates;
-- release dates;
-- expected track counts;
+- source album and artist names;
+- Spotify track IDs from the raw listening export;
 - first/last listening evidence;
 - full/near/sparse session counts;
 - session timing and duration;
 - track coverage;
 - album-level play/time totals;
-- catalog confidence and edition ambiguity.
+- workbook catalog confidence/ambiguity as calibration evidence.
 
-## Fields still requiring enrichment or app state
+The workbook's MusicBrainz release IDs are reference data, not Needle's Spotify AlbumEdition identifiers.
 
+## Fields still requiring runtime resolution, enrichment, or app state
+
+- Spotify album-edition identity for current imports;
 - album artwork;
+- Spotify destination URL;
+- canonical release metadata;
 - Music Type;
 - detailed genre taxonomy;
 - country/origin if desired;
@@ -122,7 +141,7 @@ The current history/analysis gives Needle strong support for:
 - personal notes;
 - manual corrections for unresolved catalog records.
 
-Artwork and Spotify links can be enriched after album identity is resolved. Music Type and Genre need a documented enrichment/taxonomy step and must not be guessed independently in UI code.
+Artwork and full Spotify metadata enrichment follow identity resolution in 1.05. Music Type and Genre need a documented enrichment/taxonomy step and must not be guessed independently in UI code.
 
 ## Date-range verification — resolved
 
@@ -133,9 +152,7 @@ Direct inspection of the `Session Details` sheet shows:
 - earliest `session_start_utc` Excel serial: `41093.77563923611` → **2012-07-03 18:36:55 UTC**;
 - latest `session_start_utc` Excel serial: `46257.71521388889` → **2026-08-23 17:09:54 UTC**.
 
-The latest row is album rank 375, **Petey USA — `oooo`**, session 2. It is before the project date of 2026-08-25.
-
-There is therefore **no future-date blocker** in the current analysis workbook. The importer should still validate/quarantine impossible future timestamps as a general safety rule.
+There is therefore **no future-date blocker** in the current analysis workbook. The importer still validates/quarantines impossible future timestamps as a general safety rule.
 
 ## Private source-data location
 
@@ -147,11 +164,11 @@ data/history/
 └── spotify_album_history_analysis.xlsx
 ```
 
-Everything in `data/history/` is Git-ignored except its README. The Phase 0 branch no longer tracks either the raw JSON export or the analysis workbook.
+Everything in `data/history/` is Git-ignored except its README.
 
 ### Historical exposure caveat
 
-The source files were previously committed while the repository was public. Removing them from the current branch and adding `.gitignore` prevents future tracking, but older Git commits may still contain the files. A separate Git-history rewrite/private-repo remediation is required if historical removal is desired.
+The source files were previously committed while the repository was public. Active Git branch history was rewritten to a sanitized root on 2026-08-25. GitHub-hosted orphaned objects/caches or old clones remain a separate platform/operational concern and must not be pushed back into active history.
 
 ## What the audit changes in the product plan
 
@@ -161,13 +178,5 @@ The source files were previously committed while the repository was public. Remo
 4. Decide Library membership independently from ingestion.
 5. Treat Genre/Music Type enrichment as a real workstream.
 6. Minimize raw playback fields before persistence.
-7. Give the 53 catalog-review candidates an explicit review/fallback path.
-
-## Phase 0 data questions still open
-
-- What evidence threshold determines default Library membership?
-- How should near-complete sessions appear versus full sessions?
-- How should deluxe/remaster/re-recorded editions collapse or remain separate in UI?
-- What enrichment source provides artwork and genre data?
-- What is the canonical Music Type taxonomy?
-- What historical Git/privacy remediation, if any, should be done for the already-public source commits?
+7. Give catalog-review candidates an explicit review/fallback path.
+8. Treat the workbook as calibration, not a runtime dependency or metadata provider.
