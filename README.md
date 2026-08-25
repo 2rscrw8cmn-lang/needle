@@ -14,7 +14,8 @@ Core foundation docs:
 - [`docs/DATA_AUDIT.md`](docs/DATA_AUDIT.md) — source history and prior analysis audit
 - [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) — canonical entities and evidence model
 - [`docs/IMPORT_PIPELINE.md`](docs/IMPORT_PIPELINE.md) — raw Spotify history to Needle dataset
-- [`docs/TECHNICAL_ARCHITECTURE.md`](docs/TECHNICAL_ARCHITECTURE.md) — Next.js + Cloudflare Workers + D1 architecture
+- [`docs/TECHNICAL_ARCHITECTURE.md`](docs/TECHNICAL_ARCHITECTURE.md) — Next.js-compatible + Cloudflare Workers + D1 architecture
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — local, preview, D1, and production deployment workflow
 - [`docs/INFORMATION_ARCHITECTURE.md`](docs/INFORMATION_ARCHITECTURE.md) — app structure and navigation
 - [`docs/DESIGN.md`](docs/DESIGN.md) — approved visual direction
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — phased implementation plan + issue sequence
@@ -22,13 +23,38 @@ Core foundation docs:
 
 ## Current status
 
-**Phase 0 — Foundation is complete.**
+**Phase 1 — Data Foundation.**
 
-Needle is ready to begin **Phase 1 — Data Foundation**. The first implementation package is GitHub issue **#7 — 1.00 Scaffold Needle on Next.js + Cloudflare Workers + D1**.
+Issue **#7 / 1.00** establishes the runtime foundation only. The scaffold uses the Next.js App Router/API surface through **vinext**, Cloudflare's current recommended path for new Next.js-style applications on Workers, with Cloudflare D1 bound as `DB`.
+
+No Library/Home product UI is part of this scaffold.
+
+## Local scaffold
+
+```bash
+npm install
+npm run db:migrate:local
+npm run db:verify:local
+npm run dev
+```
+
+Production-shaped Workers preview:
+
+```bash
+npm run preview
+```
+
+Quality gates:
+
+```bash
+npm run check
+```
+
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) before creating or deploying the remote D1 database.
 
 ## Accepted architecture
 
-- Next.js + TypeScript
+- Next.js-compatible App Router + TypeScript via vinext
 - Cloudflare Workers
 - Cloudflare D1
 - Spotify as the primary catalog/enrichment source
