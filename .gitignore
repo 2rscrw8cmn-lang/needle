@@ -1,0 +1,40 @@
+# Dependencies / build outputs
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Needle private/local listening-history inputs
+# Keep the real Spotify export + derived analysis workbook in data/history/ locally.
+/data/history/*
+!/data/history/README.md
+
+# Legacy/private import locations
+/data/private/
+/imports/
+/spotify-history/
+
+# Safety nets: never track history files if they are dropped at repo root
+Streaming_History_Audio_*.json
+spotify_album_history_analysis.xlsx
+
+# Temporary analysis/export outputs
+*.tmp
+*.log
+
+# NOTE:
+# The Phase 0 branch no longer tracks the raw history files or analysis workbook.
+# Older public commits may still contain previously committed copies; removing
+# those historical Git objects requires a separate history rewrite.
