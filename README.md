@@ -11,7 +11,7 @@ Read [`docs/START_HERE.md`](docs/START_HERE.md) before product or implementation
 Core foundation docs:
 
 - [`docs/PRODUCT.md`](docs/PRODUCT.md) — product purpose, V1 scope, exclusions
-- [`docs/DATA_AUDIT.md`](docs/DATA_AUDIT.md) — what the source history and prior analysis actually contain
+- [`docs/DATA_AUDIT.md`](docs/DATA_AUDIT.md) — source history and prior analysis audit
 - [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) — canonical entities and evidence model
 - [`docs/IMPORT_PIPELINE.md`](docs/IMPORT_PIPELINE.md) — raw Spotify history to Needle dataset
 - [`docs/INFORMATION_ARCHITECTURE.md`](docs/INFORMATION_ARCHITECTURE.md) — app structure and navigation
@@ -23,13 +23,14 @@ Core foundation docs:
 
 Needle is in **Phase 0 — Foundation**. No application code should be scaffolded until the Phase 0 exit gate in the roadmap is satisfied.
 
-## Data privacy warning
+## Private history data
 
-The repository currently contains the raw Spotify extended streaming-history export. Those files include timestamps, device/platform data, country, IP address, listening behavior, and Spotify identifiers. The repository is currently public.
+The real Spotify export and the prior analysis workbook belong locally in:
 
-Before Needle is shared or development broadens, choose one of these paths:
+```text
+data/history/
+```
 
-1. make the repository private and keep the source dataset with the project; or
-2. remove the raw export from the repository **and purge it from Git history**, then ingest it locally/private.
+They are ignored by Git and are no longer tracked on the Phase 0 branch. See [`data/history/README.md`](data/history/README.md).
 
-Adding raw files to `.gitignore` does not remove data already committed to Git history.
+The source files were previously committed while the repository was public. Removing them from the branch tip prevents future tracking, but older Git commits may still contain them until repository history is rewritten or otherwise remediated.
