@@ -77,18 +77,23 @@ V1 links out to Spotify. It does not require Spotify authentication, continuous 
 
 ---
 
-## D-008 — Raw Spotify data privacy
+## D-008 — Private history source location
 
-**Status:** Proposed / Phase 0 blocker
+**Status:** Accepted
 
-The raw extended history must not remain exposed in a public repository long-term.
+The real Spotify extended history and the prior personal analysis workbook are **local/private ingestion inputs**, not repository assets.
 
-Resolve by either:
+Canonical local path:
 
-1. making the repository private; or
-2. removing raw files and purging them from Git history, with imports performed from a private/local source.
+```text
+data/history/
+├── Streaming_History_Audio_*.json
+└── spotify_album_history_analysis.xlsx
+```
 
-Do not treat `.gitignore` as retroactive privacy protection.
+The directory contents are Git-ignored except its README. The Phase 0 branch no longer tracks either source type.
+
+Previously public commits may still contain copies. Historical Git remediation remains a separate decision; `.gitignore` is not retroactive privacy protection.
 
 ---
 
@@ -131,3 +136,13 @@ Framework, database, hosting, metadata provider, genre source, and import runtim
 **Status:** Accepted
 
 Build Home after Library, Explore, and History primitives exist. Home should compose real history capabilities rather than begin as a hard-coded visual demo.
+
+---
+
+## D-013 — Workbook date-range audit
+
+**Status:** Accepted / resolved
+
+Direct inspection of `Session Details` confirms the current workbook ranges from **2012-07-03 18:36:55 UTC** through **2026-08-23 17:09:54 UTC**.
+
+The earlier reported October 2026 session was an audit-side Excel serial conversion error, not a future source event. Future-date validation remains part of the importer as a general data-quality guardrail.
