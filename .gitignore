@@ -17,9 +17,17 @@ Thumbs.db
 .idea/
 
 # Needle private/local ingestion data
+# Put Spotify extended-history exports here. Everything in this folder stays local.
+/data/history/*
+!/data/history/.gitkeep
+!/data/history/README.md
+
+# Legacy/private import locations
 /data/private/
 /imports/
 /spotify-history/
+
+# Protect against accidentally dropping exports back in the repo root
 Streaming_History_Audio_*.json
 
 # Temporary analysis/export outputs
@@ -27,6 +35,6 @@ Streaming_History_Audio_*.json
 *.log
 
 # NOTE:
-# The Spotify history files are already committed on main as of Phase 0.
-# This rule prevents accidental future additions but does NOT remove existing
-# files or their Git history. See docs/DATA_AUDIT.md and docs/DECISIONS.md.
+# Raw Spotify history is intentionally not tracked going forward.
+# Older commits may still contain previously committed exports; removing those
+# from historical Git objects requires a separate history rewrite.
