@@ -13,7 +13,7 @@ Requirements:
 Install dependencies:
 
 ```bash
-npm install
+npm ci
 ```
 
 Apply the local D1 migration and verify it:
@@ -49,27 +49,27 @@ Run all local quality gates:
 npm run check
 ```
 
-## Create the production D1 database
+## Production D1 database
 
-The committed `wrangler.jsonc` contains a deliberate placeholder for the remote D1 database ID. Create the database once:
-
-```bash
-npx wrangler d1 create needle
-```
-
-Copy the returned UUID into `wrangler.jsonc` as `database_id`, replacing:
+The Cloudflare D1 database already exists as:
 
 ```text
-REPLACE_WITH_CLOUDFLARE_D1_DATABASE_ID
+needle
 ```
 
-Then apply the production migration:
+Its database ID is committed in `wrangler.jsonc`, and the Worker binding is:
+
+```text
+DB
+```
+
+Apply the production migration after authenticating Wrangler:
 
 ```bash
 npm run db:migrate:remote
 ```
 
-The D1 database ID is configuration, not a secret, and may be committed after the resource exists.
+The D1 database ID is configuration, not a secret.
 
 ## Cloudflare authentication
 
@@ -79,7 +79,7 @@ For local deployment, use Wrangler login:
 npx wrangler login
 ```
 
-For CI / Workers Builds, configure these as Cloudflare build variables/secrets:
+For CI / Workers Builds, configure these as Cloudflare build variables/secrets if required by the selected deployment path:
 
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_API_TOKEN`
@@ -136,7 +136,7 @@ The GitHub workflow verifies the scaffold without using production Cloudflare cr
 7. boot that generated Worker with `wrangler dev` using the shared `.wrangler/state` directory;
 8. request `/api/health` and require a healthy D1 response.
 
-This proves the production-shaped Worker can see the migrated local D1 database before any remote resource is provisioned.
+This proves the production-shaped Worker can see the migrated local D1 database before remote deployment.
 
 ## Verification endpoint
 
