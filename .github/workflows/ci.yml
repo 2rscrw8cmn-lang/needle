@@ -64,3 +64,11 @@ jobs:
           echo "Workers preview did not become healthy."
           cat /tmp/needle-wrangler.log
           exit 1
+
+      - name: Export generated npm lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-lockfile
+          path: package-lock.json
+          if-no-files-found: error
+          retention-days: 1
