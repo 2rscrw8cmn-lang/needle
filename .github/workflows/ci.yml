@@ -19,7 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
@@ -41,3 +40,27 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Verify Workers build output
+        run: test -f dist/server/wrangler.json
+
+      - name: Smoke-test Workers runtime + D1
+        shell: bash
+        run: |
+          npx wrangler dev --config dist/server/wrangler.json --port 8787 > /tmp/needle-wrangler.log 2>&1 &
+          WRANGLER_PID=$!
+          trap 'kill "$WRANGLER_PID" 2>/dev/null || true' EXIT
+
+          for attempt in {1..30}; do
+            if response=$(curl --fail --silent http://127.0.0.1:8787/api/health); then
+              echo "$response"
+              echo "$response" | grep '"status":"ok"'
+              echo "$response" | grep '"database":"ok"'
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Workers preview did not become healthy."
+          cat /tmp/needle-wrangler.log
+          exit 1
