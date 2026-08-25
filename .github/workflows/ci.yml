@@ -47,7 +47,7 @@ jobs:
       - name: Smoke-test Workers runtime + D1
         shell: bash
         run: |
-          npx wrangler dev --config dist/server/wrangler.json --port 8787 > /tmp/needle-wrangler.log 2>&1 &
+          npx wrangler dev --config dist/server/wrangler.json --port 8787 --persist-to .wrangler/state > /tmp/needle-wrangler.log 2>&1 &
           WRANGLER_PID=$!
           trap 'kill "$WRANGLER_PID" 2>/dev/null || true' EXIT
 
