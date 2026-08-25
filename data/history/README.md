@@ -5,19 +5,17 @@
 Place the real listening-history inputs here in a local clone:
 
 - Spotify extended-history files: `Streaming_History_Audio_*.json`
-- prior analysis workbook: `spotify_album_history_analysis.xlsx`
+- optional prior analysis workbook for project calibration: `spotify_album_history_analysis.xlsx`
 
-Split yearly files such as `Streaming_History_Audio_2014_1.json` belong here too.
+The workbook is **not required** to import another listener's Spotify history.
 
 ## 1. Validate the Spotify export
-
-From the repository root:
 
 ```bash
 npm run history:validate
 ```
 
-The validator discovers the Spotify JSON files, fingerprints them in deterministic order, checks the raw schema and timestamps, separates music from podcast/audiobook rows, quarantines invalid rows, and creates a minimized music-only stream.
+The validator discovers the Spotify JSON files, fingerprints them in deterministic order, checks schema/timestamps, separates music from podcast/audiobook rows, quarantines invalid rows, and creates a minimized music-only stream.
 
 For a reproducible audit with a fixed future-date cutoff:
 
@@ -27,29 +25,48 @@ npm run history:validate -- --as-of 2026-08-25T23:59:59Z
 
 ## 2. Normalize playback events
 
-After validation passes:
-
 ```bash
 npm run history:normalize
 ```
 
-This reads the 1.01 artifacts from `data/history/.needle/`, converts timestamps to canonical UTC, extracts Spotify track IDs when possible, assigns stable playback-event IDs, and conservatively collapses only exact duplicate event rows while preserving every source file/row reference.
-
-Review `normalization-report.md` for count reconciliation, duplicate totals, and Spotify-identity coverage.
+This converts accepted music rows into canonical UTC playback events, extracts Spotify track IDs, assigns stable event IDs, and conservatively collapses only exact duplicate events while preserving provenance.
 
 ## 3. Reconstruct album listening sessions
-
-After normalization passes:
 
 ```bash
 npm run history:sessionize
 ```
 
-This reads the minimized 1.02 playback events, groups them into deterministic provisional album runs, calculates locally observed track coverage, classifies Full / Near-Complete / Sparse / Review evidence, and identifies repeated provisional album candidates without resolving canonical Spotify editions yet.
+This groups the minimized playback events into deterministic provisional album runs, calculates local track coverage, classifies Full / Near-Complete / Sparse / Review evidence, and identifies repeated provisional album candidates.
 
-Review `sessionization-report.md` for the exact rules, event reconciliation, evidence counts, and comparison with the private workbook reference.
+## 4. Resolve canonical albums + Spotify editions
 
-Generated private outputs now include:
+Issue 1.04 uses Spotify's public catalog to separate the listener-facing canonical Album from specific Spotify AlbumEdition records.
+
+Live local resolution requires Spotify developer client credentials in the environment:
+
+```text
+SPOTIFY_CLIENT_ID
+SPOTIFY_CLIENT_SECRET
+```
+
+Optional market override:
+
+```text
+SPOTIFY_MARKET=US
+```
+
+Then run:
+
+```bash
+npm run history:resolve-albums
+```
+
+Do not commit credentials. Client Credentials are used only for public catalog lookup; user Spotify playback authorization is not required for this import stage.
+
+The resolver uses observed Spotify track IDs, Spotify album search, artist/title evidence, and track-list overlap. Weak, compilation-risk, or ambiguous identities remain Review records instead of being forced by title equality.
+
+Generated outputs include:
 
 ```text
 data/history/.needle/
@@ -64,18 +81,25 @@ data/history/.needle/
 ├── album-sessions.json
 ├── provisional-albums.json
 ├── sessionization-report.json
-└── sessionization-report.md
+├── sessionization-report.md
+├── canonical-albums.json
+├── spotify-album-editions.json
+├── album-resolution-links.json
+├── album-resolution-review.json
+├── album-resolution-report.json
+├── album-resolution-report.md
+└── spotify-resolution-cache.json
 ```
 
-See `docs/IMPORT_PIPELINE.md` for the end-to-end ingestion contract and `docs/SESSIONIZATION.md` for the exact 1.03 rules and real-history calibration.
+See `docs/SESSIONIZATION.md` for 1.03 and `docs/CATALOG_RESOLUTION.md` for the exact 1.04 identity contract.
 
 ## Privacy
 
 Everything in this folder is ignored by Git except this README.
 
-The raw Spotify export can contain IP addresses, device/platform information, timestamps, country, listening behavior, and Spotify identifiers. Do not commit those files, the personal analysis workbook, or generated `.needle/` outputs.
+The raw Spotify export can contain IP addresses, device/platform information, timestamps, country, listening behavior, and Spotify identifiers. Do not commit those files, the personal analysis workbook, generated `.needle/` outputs, or Spotify credentials.
 
-The 1.01 validator only carries the approved music-history whitelist into `validated-music.json`. The 1.02 normalizer converts that minimized stream into playback-event records, and the 1.03 sessionizer consumes only those minimized events. Neither later stage re-reads or reintroduces discarded raw private fields.
+1.01 whitelists the private source fields needed for album-history reconstruction. 1.02–1.04 consume only minimized/derived artifacts and public Spotify catalog metadata; they do not reintroduce discarded IP/device/country/offline/incognito fields.
 
 ## Historical note
 
