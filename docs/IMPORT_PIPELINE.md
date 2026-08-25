@@ -105,7 +105,7 @@ Given identical input files and the same `--as-of` cutoff, the manifest, reports
 
 Whitelist fields required for music-history reconstruction.
 
-Likely retained:
+Retained by 1.01:
 
 - timestamp;
 - milliseconds played;
@@ -113,26 +113,108 @@ Likely retained:
 - album artist name;
 - album name;
 - Spotify track URI;
-- skip/reason fields only where they materially improve session logic.
+- reason start/end;
+- skipped state;
+- source file/row provenance.
 
 Do not persist to the app database:
 
 - IP address;
-- exact raw device/platform history unless proven necessary;
-- incognito/device metadata unrelated to album history;
+- exact raw device/platform history;
+- country where it is not needed for the product;
+- incognito/offline/device metadata unrelated to album history;
 - podcast/audiobook metadata for V1.
 
-Issue 1.01 establishes this source-minimization boundary before normalization. The original private export may remain available for reproducible reprocessing, but it is not the application database.
+The original private export may remain available for reproducible reprocessing, but it is not the application database.
 
 ## Stage 3 — Normalize playback events
 
-- convert Spotify URIs to stable IDs;
-- normalize timestamps to UTC;
-- preserve original display strings for audit;
-- define exact-event duplicate handling;
-- retain `ms_played` without inventing full-track completion where duration is unknown.
+- convert Spotify track URIs to stable Spotify track IDs when valid;
+- normalize timestamps to canonical UTC ISO strings;
+- preserve source display strings rather than guessing canonical names;
+- define conservative exact-event duplicate handling;
+- retain `ms_played` without inventing full-track completion where duration is unknown;
+- preserve source-file/row and import-batch provenance.
 
 Output: normalized `PlaybackEvent` records.
+
+### Issue 1.02 implementation contract
+
+After 1.01 validation passes, run:
+
+```bash
+npm run history:normalize
+```
+
+The command reads these private 1.01 artifacts from `data/history/.needle/`:
+
+- `import-manifest.json`;
+- `import-report.json`;
+- `validated-music.json`.
+
+It refuses to continue when manifest/report batch IDs differ, when the 1.01 report is failing, when accepted-row counts do not reconcile, or when source file/row provenance falls outside the manifest.
+
+It writes:
+
+```text
+data/history/.needle/
+├── normalized-playback-events.json
+├── normalization-report.json
+└── normalization-report.md
+```
+
+Each normalized playback event contains:
+
+- stable `event_id`;
+- current `import_batch_id`;
+- canonical UTC `played_at`;
+- `ms_played`;
+- `spotify_track_id` when the URI can be parsed;
+- original minimized Spotify track URI for audit/fallback;
+- explicit identity status: `spotify`, `metadata_only`, or `unparseable_spotify_uri`;
+- source track / album artist / album display strings;
+- reason start/end and skipped state;
+- one or more source file/row references.
+
+### Stable event identity
+
+`event_id` is a SHA-256-derived identifier based on the normalized playback payload and **does not include the import batch or source location**. Therefore the same historical event receives the same event ID when it appears in a later Spotify export/reimport.
+
+Import provenance remains separate through `import_batch_id` and `source_refs`.
+
+### Exact duplicate rule
+
+Needle collapses two validated rows only when all event-defining values match after timestamp normalization:
+
+- canonical UTC timestamp;
+- milliseconds played;
+- Spotify URI/parsed-ID state;
+- track name;
+- album artist name;
+- album name;
+- reason start;
+- reason end;
+- skipped state.
+
+This is deliberately conservative. Same title/artist/album alone is never enough to deduplicate a play. When exact duplicates collapse, every source file/row reference is retained on the surviving normalized event.
+
+The normalization report must satisfy:
+
+```text
+validated music rows = normalized events + duplicate rows collapsed
+```
+
+and its validated-row count must match `acceptedMusicRows` from the 1.01 import report.
+
+### Missing track identity
+
+A null Spotify track URI is valid at this stage. The event remains `metadata_only` using preserved track/artist/album strings for later identity resolution.
+
+A non-null URI that does not parse as `spotify:track:<id>` is retained but marked `unparseable_spotify_uri`. 1.02 does not guess a track ID from text.
+
+### Privacy boundary
+
+1.02 reads only the minimized 1.01 artifacts; it does not re-read raw export rows. Unknown extra fields are ignored rather than copied into normalized events. IP address, platform/device, country, offline, incognito, podcast, and audiobook data therefore remain outside the normalized playback-event representation.
 
 ## Stage 4 — Resolve track identity
 
@@ -198,8 +280,6 @@ Needed for the product but not supplied completely by the analysis workbook:
 
 Enrichment must be cached/persisted so normal Needle page loads do not depend on re-enriching the entire collection.
 
-The specific enrichment provider/API is a Phase 0 architecture decision.
-
 ## Stage 9 — Assign Music Type
 
 Map detailed genre/enrichment data to Needle's broad Music Type taxonomy using a deterministic mapping table with manual override support.
@@ -236,14 +316,15 @@ Reimport must:
 
 ## Validation outputs
 
-Every import should report at minimum:
+Every import should ultimately report at minimum:
 
 - source files read;
 - raw rows;
 - music rows accepted;
 - podcast/audiobook rows excluded;
 - invalid/future rows quarantined;
-- unique track IDs;
+- normalized playback events and duplicate rows collapsed;
+- Spotify track-ID coverage;
 - derived sessions by status;
 - canonical albums;
 - matched/unresolved editions;
@@ -251,19 +332,19 @@ Every import should report at minimum:
 - Music Type coverage;
 - before/after changes versus previous import.
 
-The earlier-stage metrics become available incrementally. Issue 1.01 covers source files, row/content counts, quarantine, schema diagnostics, and minimized music rows; later issues add identity/session/catalog/taxonomy metrics.
+The metrics become available incrementally. 1.01 covers source validation/minimization; 1.02 adds normalized-event, duplicate, identity-coverage, and reconciliation metrics; later issues add sessions/catalog/taxonomy metrics.
 
 ## Fixtures
 
-The repository should ultimately contain a small sanitized fixture dataset representing hard cases:
+Use small sanitized fixtures representing hard cases. Never commit real private source history.
 
-- normal standard album;
-- deluxe edition;
-- remaster/reissue;
-- re-recording;
-- near-complete listen;
-- sparse single-track play;
-- unresolved edition;
-- future/invalid timestamp.
+Current/expected cases include:
 
-Fixtures must not contain real IP addresses or unnecessary private source metadata. Issue 1.01 adds the first source-validation fixture; later data issues should extend it rather than committing real history.
+- normal music event;
+- missing Spotify track URI;
+- exact duplicate rows;
+- malformed Spotify URI;
+- future/invalid timestamp;
+- podcast/audiobook exclusion;
+- schema drift;
+- later: deluxe/remaster/re-recording/session/catalog ambiguity.
