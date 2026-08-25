@@ -13,7 +13,8 @@ GitHub
 Cloudflare Workers Builds
   │
   ▼
-Next.js + TypeScript
+Next.js-compatible App Router + TypeScript
+(vinext scaffold)
 on Cloudflare Workers
   │
   ├──────────────► Spotify Web API
@@ -28,10 +29,20 @@ Optional services should be added only for demonstrated needs.
 
 ## Application
 
-- Next.js + TypeScript.
+- Next.js-compatible App Router/API surface + TypeScript.
 - Full-stack deployment on Cloudflare Workers.
 - Prefer Server Components / server-side data access where they simplify the product, but do not over-engineer caching or rendering strategies before real performance needs exist.
-- The exact Cloudflare Next.js adapter/build path must follow current Cloudflare guidance at scaffold time. Do not preserve an obsolete adapter solely because it appears in an older plan.
+- **Issue 1.00 uses vinext** because Cloudflare recommends it for new Next.js-style Workers applications as of 2026-08-25.
+- Vinext is an implementation/tooling choice, not a permanent product contract. If Cloudflare changes its recommended Next.js compatibility path later, evaluate migration rather than preserving obsolete adapter infrastructure.
+
+### Current Workers scaffold contract
+
+- Vite config composes `vinext()` with `@cloudflare/vite-plugin`.
+- Worker entry is `vinext/server/app-router-entry`.
+- Cloudflare D1 is bound as `DB`.
+- D1 migrations live in `/migrations`.
+- `/api/health` is the runtime/D1 verification endpoint during the scaffold phase.
+- The verification page is temporary infrastructure UI, not a product design baseline.
 
 ## Database — Cloudflare D1
 
@@ -52,6 +63,8 @@ Expected domains include:
 - import batches and provenance.
 
 The scale of the personal archive does not justify a separate Postgres platform in V1.
+
+Issue 1.00 intentionally creates only a tiny `needle_meta` table for schema/runtime verification. Product tables belong to later bounded data-foundation issues.
 
 ## Search and filtering
 
@@ -160,15 +173,17 @@ merge to main
 production Worker
 ```
 
-Use GitHub-connected Cloudflare Workers Builds for branch/PR previews and production deployment where practical.
+Use GitHub-connected Cloudflare Workers Builds for branch/PR previews and production deployment where practical. See `DEPLOYMENT.md` for current build, migration, preview, and deploy commands.
 
 ## Secrets
 
 Keep all credentials outside Git:
 
 - Spotify credentials;
-- Cloudflare bindings/secrets;
+- Cloudflare API credentials/secrets;
 - future third-party credentials.
+
+D1 database IDs and binding configuration are infrastructure identifiers rather than application secrets; the real remote D1 ID may be committed after the database is created.
 
 Raw Spotify history is never a deployment secret or repository asset; it is private local ingestion material.
 
