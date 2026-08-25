@@ -1,0 +1,32 @@
+# Dependencies / build outputs
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Needle private/local ingestion data
+/data/private/
+/imports/
+/spotify-history/
+Streaming_History_Audio_*.json
+
+# Temporary analysis/export outputs
+*.tmp
+*.log
+
+# NOTE:
+# The Spotify history files are already committed on main as of Phase 0.
+# This rule prevents accidental future additions but does NOT remove existing
+# files or their Git history. See docs/DATA_AUDIT.md and docs/DECISIONS.md.
