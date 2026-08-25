@@ -23,6 +23,14 @@ npm run db:migrate:local
 npm run db:verify:local
 ```
 
+Needle explicitly stores local Wrangler/D1 state in:
+
+```text
+.wrangler/state
+```
+
+The migration, verification, and production-shaped preview commands all use that same persistence directory so the Worker sees the database state created by the migration. The directory is Git-ignored.
+
 Start development:
 
 ```bash
@@ -114,6 +122,21 @@ Recommended configuration:
 - Preview deploy command: `npm run deploy -- --preview --skip-build`
 
 Keep deployment credentials in Cloudflare's Build Variables and secrets. Do not commit them to GitHub.
+
+## CI verification
+
+The GitHub workflow verifies the scaffold without using production Cloudflare credentials:
+
+1. install dependencies;
+2. apply and query the local D1 migration;
+3. lint and typecheck;
+4. run unit tests;
+5. build with vinext;
+6. verify `dist/server/wrangler.json` exists;
+7. boot that generated Worker with `wrangler dev` using the shared `.wrangler/state` directory;
+8. request `/api/health` and require a healthy D1 response.
+
+This proves the production-shaped Worker can see the migrated local D1 database before any remote resource is provisioned.
 
 ## Verification endpoint
 
