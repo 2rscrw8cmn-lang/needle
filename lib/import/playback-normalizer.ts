@@ -268,13 +268,22 @@ function normalizeRow(row: MinimizedMusicRow): EventPayload {
     row.source_file,
     row.source_row,
   );
+  assertNullableString(
+    row.spotify_track_uri,
+    "spotify_track_uri",
+    row.source_file,
+    row.source_row,
+  );
+  assertNullableString(row.reason_start, "reason_start", row.source_file, row.source_row);
+  assertNullableString(row.reason_end, "reason_end", row.source_file, row.source_row);
+  assertNullableBoolean(row.skipped, "skipped", row.source_file, row.source_row);
 
   const playedAtMs = Date.parse(row.ts);
   if (Number.isNaN(playedAtMs)) {
     throw contractError(row.source_file, row.source_row, "invalid timestamp");
   }
 
-  const uri = nullableString(row.spotify_track_uri);
+  const uri = row.spotify_track_uri;
   const spotifyTrackId = spotifyTrackIdFromUri(uri);
   const trackIdentityStatus: TrackIdentityStatus = spotifyTrackId
     ? "spotify"
@@ -291,9 +300,9 @@ function normalizeRow(row: MinimizedMusicRow): EventPayload {
     track_name: row.master_metadata_track_name,
     artist_name: row.master_metadata_album_artist_name,
     album_name: row.master_metadata_album_album_name,
-    reason_start: nullableString(row.reason_start),
-    reason_end: nullableString(row.reason_end),
-    skipped: typeof row.skipped === "boolean" ? row.skipped : null,
+    reason_start: row.reason_start,
+    reason_end: row.reason_end,
+    skipped: row.skipped,
   };
 }
 
@@ -436,6 +445,28 @@ function assertNonEmptyString(
   }
 }
 
+function assertNullableString(
+  value: unknown,
+  field: string,
+  file: string,
+  row: number,
+): asserts value is string | null {
+  if (value !== null && typeof value !== "string") {
+    throw contractError(file, row, `invalid ${field}`);
+  }
+}
+
+function assertNullableBoolean(
+  value: unknown,
+  field: string,
+  file: string,
+  row: number,
+): asserts value is boolean | null {
+  if (value !== null && typeof value !== "boolean") {
+    throw contractError(file, row, `invalid ${field}`);
+  }
+}
+
 function assertInteger(
   value: unknown,
   field: string,
@@ -447,15 +478,11 @@ function assertInteger(
   }
 }
 
-function nullableString(value: unknown): string | null {
-  return typeof value === "string" ? value : null;
-}
-
 function contractError(file: string, row: number, reason: string): Error {
   return new Error(`1.01 artifact contract error at ${file} row ${row}: ${reason}.`);
 }
 
-function isRecord(value: unknown): value is Record<string, any> {
+function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
