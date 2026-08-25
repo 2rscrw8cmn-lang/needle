@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
@@ -65,10 +65,19 @@ jobs:
           cat /tmp/needle-wrangler.log
           exit 1
 
-      - name: Export generated npm lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: npm-lockfile
-          path: package-lock.json
-          if-no-files-found: error
-          retention-days: 1
+      - name: Commit generated npm lockfile
+        if: github.event_name == 'pull_request' && github.head_ref == 'feat/1.00-cloudflare-scaffold'
+        shell: bash
+        run: |
+          if git ls-tree -r --name-only "${{ github.event.pull_request.head.sha }}" | grep -qx 'package-lock.json'; then
+            echo "package-lock.json is already tracked."
+            exit 0
+          fi
+
+          git fetch origin "${{ github.head_ref }}"
+          git switch -C "${{ github.head_ref }}" FETCH_HEAD
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore: lock scaffold dependencies"
+          git push origin "HEAD:${{ github.head_ref }}"
