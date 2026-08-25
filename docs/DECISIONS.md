@@ -133,7 +133,7 @@ If ratings are later added, store them in PersonalAlbumState and keep them indep
 
 Needle uses a Cloudflare-first architecture:
 
-- **application:** Next.js + TypeScript;
+- **application:** Next.js-compatible App Router + TypeScript;
 - **runtime/hosting:** Cloudflare Workers;
 - **database:** Cloudflare D1;
 - **deployment:** GitHub-connected Cloudflare Workers Builds / preview deployments;
@@ -141,7 +141,7 @@ Needle uses a Cloudflare-first architecture:
 - **object storage:** Cloudflare R2 only when a concrete non-Spotify artifact/storage need exists;
 - **search/filtering:** D1/SQL first; add another search service only if real usage requires it.
 
-The exact Cloudflare adapter/build integration should follow current Cloudflare guidance at scaffold time rather than being permanently pinned in this decision log.
+The Cloudflare adapter/tooling may change over the life of the app. The durable architecture contract is the Next.js-compatible App Router surface on Workers with D1, not a specific adapter package.
 
 See `TECHNICAL_ARCHITECTURE.md`.
 
@@ -215,3 +215,20 @@ Rules after the rewrite:
 - raw history/workbook files remain ignored and local-only;
 - any collaborator with an old clone should re-clone or hard-reset rather than pushing old history back;
 - GitHub-hosted orphaned objects, caches, or pull-request refs are outside active branch history and may require GitHub platform/support cleanup if they remain directly accessible.
+
+---
+
+## D-017 — Cloudflare Next.js compatibility tooling
+
+**Status:** Accepted for the 1.00 scaffold
+
+Issue 1.00 uses **vinext** with the Cloudflare Vite plugin because Cloudflare recommends vinext for new Next.js-style Workers applications as of 2026-08-25.
+
+This decision does **not** redefine Needle as a vinext-specific product. Preserve the Next.js-compatible App Router/API programming model and Cloudflare Workers/D1 architecture. If Cloudflare's recommended compatibility tooling changes later, migration may be evaluated without reopening the broader product architecture.
+
+Current scaffold conventions:
+
+- Cloudflare D1 binding: `DB`;
+- D1 migration directory: `/migrations`;
+- runtime verification route: `/api/health`;
+- remote D1 UUID is added to `wrangler.jsonc` after the real Cloudflare database is created.
