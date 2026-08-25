@@ -117,7 +117,7 @@ Production branch: `main`.
 
 Recommended configuration:
 
-- Build command: `npm install --no-audit --no-fund && npm run build`
+- Build command: `npm ci --no-audit --no-fund && npm run build`
 - Deploy command: `npm run deploy -- --skip-build`
 - Preview deploy command: `npm run deploy -- --preview --skip-build`
 
@@ -127,7 +127,7 @@ Keep deployment credentials in Cloudflare's Build Variables and secrets. Do not 
 
 The GitHub workflow verifies the scaffold without using production Cloudflare credentials:
 
-1. install dependencies;
+1. install the committed dependency lock with `npm ci`;
 2. apply and query the local D1 migration;
 3. lint and typecheck;
 4. run unit tests;
