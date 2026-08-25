@@ -1,9 +1,12 @@
 # Dependencies / build outputs
 node_modules/
 .next/
+.vinext/
+.wrangler/
 dist/
 build/
 coverage/
+cloudflare-env.d.ts
 
 # Environment / secrets
 .env
@@ -34,7 +37,4 @@ spotify_album_history_analysis.xlsx
 *.tmp
 *.log
 
-# NOTE:
-# The Phase 0 branch no longer tracks the raw history files or analysis workbook.
-# Older public commits may still contain previously committed copies; removing
-# those historical Git objects requires a separate history rewrite.
+# Raw history was removed from active Git history during Phase 0.
