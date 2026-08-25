@@ -40,6 +40,67 @@ NEEDLE DATABASE
 
 Output: import manifest + validated source stream.
 
+### Issue 1.01 implementation contract
+
+Run the local validator from the repository root:
+
+```bash
+npm run history:validate
+```
+
+By default it reads the private source files in `data/history/` and writes private generated outputs to:
+
+```text
+data/history/.needle/
+├── import-manifest.json
+├── import-report.json
+├── import-report.md
+├── validated-music.json
+└── quarantine.json
+```
+
+The entire `data/history/` directory remains Git-ignored except its README, so generated reports and minimized history are local ingestion artifacts rather than repository assets.
+
+`import-manifest.json` is input-derived only. It records naturally ordered source filenames, byte counts, SHA-256 fingerprints, parse status, row counts, and a batch ID derived from those file identities. It does not contain listening-row values.
+
+`import-report.json` and `import-report.md` report:
+
+- music, podcast, audiobook, unknown/mixed, accepted, excluded, and quarantined counts;
+- fatal file errors;
+- observed/missing/unexpected field names;
+- per-file null rates;
+- field-set and null-rate changes relative to the first valid source file;
+- quarantine reasons.
+
+Reports intentionally contain field names and row references, not raw private field values.
+
+`validated-music.json` is the source-minimized stream passed to the next import stage. Its whitelist is currently:
+
+- source filename + source row number for provenance;
+- `ts`;
+- `ms_played`;
+- `master_metadata_track_name`;
+- `master_metadata_album_artist_name`;
+- `master_metadata_album_album_name`;
+- `spotify_track_uri`;
+- `reason_start`;
+- `reason_end`;
+- `skipped`.
+
+It explicitly excludes IP address, platform/device, country, offline metadata, incognito metadata, and podcast/audiobook payload fields.
+
+`quarantine.json` stores only source file, row number, content category, and reason codes. It does not duplicate the offending source row.
+
+Malformed JSON and non-array top-level files make the validation run fail visibly. Invalid individual rows are quarantined while valid rows continue through the validation stage.
+
+Future-date validation uses the execution time by default with a five-minute clock-skew tolerance. For reproducible audits/tests, pass a fixed cutoff:
+
+```bash
+npm run history:validate -- --as-of 2026-08-25T23:59:59Z
+```
+
+Given identical input files and the same `--as-of` cutoff, the manifest, reports, minimized stream, and quarantine output are deterministic.
+
 ## Stage 2 — Data minimization
 
 Whitelist fields required for music-history reconstruction.
@@ -61,7 +122,7 @@ Do not persist to the app database:
 - incognito/device metadata unrelated to album history;
 - podcast/audiobook metadata for V1.
 
-The original private export may remain available for reproducible reprocessing, but it is not the application database.
+Issue 1.01 establishes this source-minimization boundary before normalization. The original private export may remain available for reproducible reprocessing, but it is not the application database.
 
 ## Stage 3 — Normalize playback events
 
@@ -190,6 +251,8 @@ Every import should report at minimum:
 - Music Type coverage;
 - before/after changes versus previous import.
 
+The earlier-stage metrics become available incrementally. Issue 1.01 covers source files, row/content counts, quarantine, schema diagnostics, and minimized music rows; later issues add identity/session/catalog/taxonomy metrics.
+
 ## Fixtures
 
 The repository should ultimately contain a small sanitized fixture dataset representing hard cases:
@@ -203,4 +266,4 @@ The repository should ultimately contain a small sanitized fixture dataset repre
 - unresolved edition;
 - future/invalid timestamp.
 
-Fixtures must not contain real IP addresses or unnecessary private source metadata.
+Fixtures must not contain real IP addresses or unnecessary private source metadata. Issue 1.01 adds the first source-validation fixture; later data issues should extend it rather than committing real history.
