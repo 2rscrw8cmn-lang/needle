@@ -1,0 +1,44 @@
+{
+  "name": "needle",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <27"
+  },
+  "scripts": {
+    "dev": "vinext dev",
+    "build": "vinext build",
+    "preview": "npm run build && wrangler dev --config dist/server/wrangler.json --persist-to .wrangler/state",
+    "deploy": "vinext-cloudflare deploy --config dist/server/wrangler.json",
+    "lint": "oxlint .",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "typecheck": "npm run cf-typegen && tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local --persist-to .wrangler/state",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "db:verify:local": "wrangler d1 execute DB --local --persist-to .wrangler/state --command \"SELECT value FROM needle_meta WHERE key = 'schema_version';\""
+  },
+  "dependencies": {
+    "@vinext/cloudflare": "1.0.0-beta.4",
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-server-dom-webpack": "19.2.8",
+    "vinext": "1.0.0-beta.4"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.53.1",
+    "@types/node": "26.2.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "6.1.0",
+    "@vitejs/plugin-rsc": "0.5.34",
+    "oxlint": "1.80.0",
+    "typescript": "7.0.2",
+    "vite": "8.2.2",
+    "vitest": "4.1.11",
+    "wrangler": "4.125.0"
+  }
+}
