@@ -12,7 +12,7 @@
     {
       "binding": "DB",
       "database_name": "needle",
-      "database_id": "REPLACE_WITH_CLOUDFLARE_D1_DATABASE_ID",
+      "database_id": "eee8bbf7-e8e0-45de-b755-7bd67ec5e069",
       "migrations_dir": "migrations"
     }
   ]
