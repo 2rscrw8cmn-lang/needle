@@ -2,7 +2,7 @@
 
 ## Approved Needle design inspiration
 
-`needle-design-inspiration.png` is the approved visual-direction reference from the initial Needle planning work.
+[`needle-design-inspiration.jpg`](needle-design-inspiration.jpg) is the approved visual-direction reference from the initial Needle planning work.
 
 Use it for:
 
