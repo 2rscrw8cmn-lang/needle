@@ -8,7 +8,7 @@ Needle should feel like a personal record archive or well-designed music publica
 
 The approved visual reference lives at:
 
-`docs/reference/needle-design-inspiration.png`
+[`docs/reference/needle-design-inspiration.jpg`](reference/needle-design-inspiration.jpg)
 
 It establishes **mood, hierarchy, artwork scale, typography contrast, spacing, and editorial composition**. It is not a screen to trace literally.
 
