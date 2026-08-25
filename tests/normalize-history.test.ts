@@ -171,6 +171,17 @@ describe("playback event normalization", () => {
     expect(emitted).not.toContain("conn_country");
   });
 
+  it("fails visibly when a supposedly validated optional field has the wrong type", () => {
+    const tampered = {
+      ...row(),
+      spotify_track_uri: 123,
+    } as unknown as MinimizedMusicRow;
+
+    expect(() => normalizePlaybackEvents(artifacts([tampered]))).toThrow(
+      "invalid spotify_track_uri",
+    );
+  });
+
   it("fails visibly when 1.01 accepted counts do not reconcile", () => {
     expect(() => normalizePlaybackEvents(artifacts([row()], { acceptedRows: 2 }))).toThrow(
       "accepted music count does not match validated-music.json",
