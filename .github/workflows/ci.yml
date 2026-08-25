@@ -39,6 +39,18 @@ jobs:
       - name: Test
         run: npm run test
 
+      - name: Validate sanitized history fixture
+        run: |
+          npm run history:validate -- \
+            --input fixtures/history \
+            --output /tmp/needle-history-validation \
+            --as-of 2026-08-25T23:59:59Z
+          test -f /tmp/needle-history-validation/import-manifest.json
+          test -f /tmp/needle-history-validation/import-report.json
+          test -f /tmp/needle-history-validation/import-report.md
+          test -f /tmp/needle-history-validation/validated-music.json
+          test -f /tmp/needle-history-validation/quarantine.json
+
       - name: Build
         run: npm run build
 

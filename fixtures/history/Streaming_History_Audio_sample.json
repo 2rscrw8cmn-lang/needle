@@ -1,0 +1,92 @@
+[
+  {
+    "ts": "2026-08-20T12:00:00Z",
+    "platform": "fixture-device",
+    "ms_played": 181000,
+    "conn_country": "ZZ",
+    "ip_addr": "not-retained",
+    "master_metadata_track_name": "First Light",
+    "master_metadata_album_artist_name": "Sample Artist",
+    "master_metadata_album_album_name": "Sample Album",
+    "spotify_track_uri": "spotify:track:sample001",
+    "episode_name": null,
+    "episode_show_name": null,
+    "spotify_episode_uri": null,
+    "reason_start": "trackdone",
+    "reason_end": "trackdone",
+    "shuffle": false,
+    "skipped": false,
+    "offline": false,
+    "offline_timestamp": null,
+    "incognito_mode": false,
+    "new_export_field": "schema-drift-example"
+  },
+  {
+    "ts": "2026-08-20T12:03:05Z",
+    "platform": "fixture-device",
+    "ms_played": 200000,
+    "conn_country": "ZZ",
+    "ip_addr": "not-retained",
+    "master_metadata_track_name": "Second Light",
+    "master_metadata_album_artist_name": "Sample Artist",
+    "master_metadata_album_album_name": "Sample Album",
+    "spotify_track_uri": null,
+    "episode_name": null,
+    "episode_show_name": null,
+    "spotify_episode_uri": null,
+    "reason_start": "trackdone",
+    "reason_end": "trackdone",
+    "shuffle": false,
+    "skipped": false,
+    "offline": false,
+    "offline_timestamp": null,
+    "incognito_mode": false
+  },
+  {
+    "ts": "2026-08-20T13:00:00Z",
+    "platform": "fixture-device",
+    "ms_played": 900000,
+    "master_metadata_track_name": null,
+    "master_metadata_album_artist_name": null,
+    "master_metadata_album_album_name": null,
+    "spotify_track_uri": null,
+    "episode_name": "Sample Episode",
+    "episode_show_name": "Sample Show",
+    "spotify_episode_uri": "spotify:episode:sample001",
+    "reason_start": "clickrow",
+    "reason_end": "endplay",
+    "skipped": false
+  },
+  {
+    "ts": "2026-08-20T14:00:00Z",
+    "ms_played": 600000,
+    "master_metadata_track_name": null,
+    "master_metadata_album_artist_name": null,
+    "master_metadata_album_album_name": null,
+    "spotify_track_uri": null,
+    "audiobook_title": "Sample Book",
+    "audiobook_uri": "spotify:audiobook:sample001",
+    "audiobook_chapter_title": "Sample Chapter",
+    "audiobook_chapter_uri": "spotify:chapter:sample001"
+  },
+  {
+    "ts": "not-a-timestamp",
+    "ms_played": 1000,
+    "master_metadata_track_name": "Bad Clock",
+    "master_metadata_album_artist_name": "Sample Artist",
+    "master_metadata_album_album_name": "Sample Album",
+    "spotify_track_uri": "spotify:track:sample002"
+  },
+  {
+    "ts": "2099-01-01T00:00:00Z",
+    "ms_played": 1000,
+    "master_metadata_track_name": "Future Track",
+    "master_metadata_album_artist_name": "Sample Artist",
+    "master_metadata_album_album_name": "Sample Album",
+    "spotify_track_uri": "spotify:track:sample003"
+  },
+  {
+    "ts": "2026-08-20T15:00:00Z",
+    "ms_played": 1000
+  }
+]
