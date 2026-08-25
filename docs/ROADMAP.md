@@ -2,13 +2,11 @@
 
 ## Operating principle
 
-Needle should be built in vertical, reviewable work packages. Do not hand an agent an entire phase as one implementation task.
-
-Preferred unit of work:
+Needle should be built in vertical, reviewable work packages:
 
 **one meaningful issue → one branch → one PR → verify → merge**
 
-The roadmap describes phase outcomes. GitHub issues should describe bounded implementation packages.
+The roadmap defines phase outcomes. GitHub issues define bounded implementation work.
 
 ---
 
@@ -18,19 +16,23 @@ The roadmap describes phase outcomes. GitHub issues should describe bounded impl
 
 Agree on what Needle is, what the source data means, how identity/evidence work, and what visual/technical constraints agents must honor before app code begins.
 
-## Work packages
-
 ### 0.01 Dataset audit
 
-Status: **documented; verification items remain**
+Status: **documented; core audit complete**
 
 Deliverable: `DATA_AUDIT.md`
 
-Open verification:
+Resolved:
 
-- resolve the future-dated session anomaly;
-- choose privacy path for raw history in the public repo;
-- verify final import inventory/counts directly from raw files.
+- raw source data has a local-only home at `data/history/`;
+- raw JSON files and the analysis workbook are no longer tracked on the Phase 0 branch;
+- the apparent October 2026 session was an audit conversion error; the actual latest session is 2026-08-23;
+- source-field privacy/minimization requirements are documented.
+
+Remaining:
+
+- decide whether to rewrite old Git history / otherwise remediate the previously public source commits;
+- verify final import inventory/counts when the production importer is implemented.
 
 ### 0.02 Canonical data model
 
@@ -67,7 +69,7 @@ Status: **documented**
 Deliverables:
 
 - `DESIGN.md`
-- `reference/needle-design-inspiration.png`
+- `reference/needle-design-inspiration.jpg`
 
 ### 0.06 Import architecture
 
@@ -79,9 +81,7 @@ Deliverable: `IMPORT_PIPELINE.md`
 
 Status: **not selected**
 
-Decide only after the data contracts above are accepted.
-
-Decision should cover:
+Decide after the data/product contracts are accepted. Record:
 
 - web framework/runtime;
 - database;
@@ -94,7 +94,7 @@ Decision should cover:
 - deployment environments;
 - secrets/private-source-data handling.
 
-Do not select technology solely because another project uses it.
+Do not choose technology solely because another project uses it.
 
 ### 0.08 Roadmap + agent contract
 
@@ -105,20 +105,21 @@ Deliverables:
 - `START_HERE.md`
 - `AGENTS.md`
 - `DECISIONS.md`
-- this roadmap
+- this roadmap.
 
 ## Phase 0 exit gate
 
 Application scaffolding may begin when all are true:
 
-- [ ] raw Spotify data privacy path is resolved;
-- [ ] future-date anomaly is resolved or explicitly quarantined;
+- [x] private/local source-data path is defined and source files are untracked on the Phase 0 branch;
+- [x] date-range audit is resolved;
+- [ ] historical Git/privacy remediation is explicitly accepted, deferred, or completed;
 - [ ] archive membership threshold is accepted;
 - [ ] canonical Album/Edition model is accepted;
 - [ ] Music Type taxonomy approach is accepted;
 - [ ] enrichment provider(s) are selected;
 - [ ] technical architecture is recorded in `DECISIONS.md`;
-- [ ] approved design reference is committed;
+- [x] approved design reference is committed;
 - [ ] Phase 1 issues are created and bounded.
 
 ---
@@ -127,54 +128,47 @@ Application scaffolding may begin when all are true:
 
 ## Goal
 
-Produce a deterministic Needle dataset from the raw Spotify export.
+Produce a deterministic Needle dataset from the private Spotify export.
 
 Suggested issues:
 
 ### 1.01 Import manifest + raw validation
-
-- discover files;
-- validate schema;
+- read `data/history/Streaming_History_Audio_*.json`;
+- validate schema/timestamps;
 - separate music from podcast/audiobook rows;
-- quarantine future/invalid events;
-- emit import report.
+- quarantine invalid/impossible future events;
+- emit an import report.
 
 ### 1.02 Playback normalization
-
 - normalized UTC timestamps;
 - Spotify track identity;
 - deduplication rules;
 - minimized stored fields.
 
 ### 1.03 Album sessionization
-
 - reproduce/validate workbook session behavior;
 - Full/Near/Sparse/Review classification;
 - deterministic tests.
 
 ### 1.04 Canonical album + edition resolution
-
 - Album vs AlbumEdition;
 - preferred Spotify edition;
 - ambiguity/review state;
 - validate against workbook Catalog Matches.
 
 ### 1.05 Catalog enrichment
-
 - artwork;
 - canonical/preferred release metadata;
 - genre source;
 - caching/persistence.
 
 ### 1.06 Music Type taxonomy
-
 - controlled taxonomy;
 - genre → Music Type mapping;
 - provenance;
 - manual overrides.
 
 ### 1.07 Listener summaries + import validation
-
 - first/last heard;
 - session counts;
 - archive classification;
@@ -197,26 +191,26 @@ Suggested issues:
 
 ## Goal
 
-Ship the first useful Needle product slice: find a record quickly and understand its history.
+Ship the first useful product slice: find a record quickly and understand its history.
 
 Suggested issues:
 
-### 2.01 Application shell + design tokens
-### 2.02 Album artwork component/system
-### 2.03 Library cover wall/grid
-### 2.04 Search
-### 2.05 Filters + sorting
-### 2.06 Album detail
-### 2.07 Listening-history evidence/timeline
-### 2.08 Open in Spotify
-### 2.09 Responsive/mobile Library QA
+- 2.01 Application shell + design tokens
+- 2.02 Album artwork system
+- 2.03 Library cover wall/grid
+- 2.04 Search
+- 2.05 Filters + sorting
+- 2.06 Album detail
+- 2.07 Listening-history evidence/timeline
+- 2.08 Open in Spotify
+- 2.09 Responsive/mobile Library QA
 
 ## Phase 2 exit gate
 
 - [ ] real archive data, not placeholder albums;
 - [ ] search/filter combinations are fast and correct;
 - [ ] artwork remains visually dominant;
-- [ ] Album detail explains history without exposing database jargon;
+- [ ] Album detail explains history without database jargon;
 - [ ] resolved records open the intended Spotify edition;
 - [ ] mobile and desktop pass design review.
 
@@ -228,14 +222,7 @@ Suggested issues:
 
 Make the archive enjoyable to browse without knowing what to search for.
 
-Suggested issues:
-
-- Music Type browsing;
-- Genre browsing;
-- release decade/year;
-- Artist index;
-- historically derived collection slices;
-- Explore responsive/editorial polish.
+Work includes Music Type, Genre, release decade/year, Artist index, historically derived collection slices, and responsive editorial polish.
 
 Avoid turning Explore into a second filter form.
 
@@ -245,17 +232,9 @@ Avoid turning Explore into a second filter form.
 
 ## Goal
 
-Turn chronological listening evidence into a useful, album-art-forward history.
+Turn chronological listening evidence into an album-art-forward history.
 
-Suggested issues:
-
-- year/period explorer;
-- new-to-history vs revisited records;
-- first/last heard;
-- most revisited / long-span records;
-- Music Type/Genre movement over time;
-- listening-era derivation;
-- restrained supporting charts.
+Work includes year/period exploration, new vs revisited records, first/last heard, long-span records, Music Type/Genre movement, listening eras, and restrained supporting charts.
 
 Editorial language must remain data-grounded.
 
@@ -265,7 +244,7 @@ Editorial language must remain data-grounded.
 
 ## Goal
 
-Build the most expressive Needle surface after the underlying data/features are trustworthy.
+Build the most expressive Needle surface after the underlying features are trustworthy.
 
 Possible modules:
 
@@ -277,7 +256,7 @@ Possible modules:
 - Music Type/Genre shelf;
 - recently revisited.
 
-Home comes after Library/Explore/History intentionally so it composes real product primitives instead of hard-coded demo stories.
+Home comes after Library/Explore/History so it composes real product primitives rather than hard-coded demo stories.
 
 ---
 
@@ -285,7 +264,7 @@ Home comes after Library/Explore/History intentionally so it composes real produ
 
 ## Goal
 
-Make the product dependable and intentional rather than merely feature-complete.
+Make Needle dependable and intentional rather than merely feature-complete.
 
 Work:
 
@@ -301,4 +280,4 @@ Work:
 
 ## V1 stop point
 
-After Phase 6, stop and use Needle before adding major scope. Evaluate whether features such as ratings, Spotify sync/auth, playlists, or recommendation systems solve an observed problem before expanding the product.
+After Phase 6, use Needle before adding major scope. Add ratings, Spotify sync/auth, playlists, or recommendation systems only if they solve an observed problem.
