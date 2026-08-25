@@ -95,7 +95,7 @@ data/history/
 
 The directory contents are Git-ignored except its README.
 
-Historical commits that previously contained these files will be removed from the active repository history while Needle is still new. GitHub-hosted caches or pull-request refs outside rewritten branch history may require separate platform-side cleanup.
+Active repository history was rewritten to remove the previously committed source files. GitHub-hosted caches or pull-request refs outside rewritten branch history may require separate platform-side cleanup.
 
 ---
 
@@ -204,13 +204,14 @@ Spotify-provided visual content must remain linked/attributed according to the c
 
 ## D-016 — Git history privacy remediation
 
-**Status:** Accepted / in progress
+**Status:** Accepted / completed for active branch history
 
-While the repository is new, rewrite active Git branch history to a clean root that contains only the current sanitized Needle project state.
+On 2026-08-25, Needle's active repository history was rewritten to a new sanitized parentless root commit after the raw Spotify history and analysis workbook were removed from the tracked tree.
 
-After the rewrite:
+`main` and the active docs branches were repointed to the clean history.
 
-- `main` and active development branches should point to the clean history;
+Rules after the rewrite:
+
 - raw history/workbook files remain ignored and local-only;
-- collaborators with an old clone should re-clone or hard-reset rather than pushing old history back;
-- GitHub-hosted PR refs/caches may require separate support-side removal if they continue exposing orphaned sensitive objects.
+- any collaborator with an old clone should re-clone or hard-reset rather than pushing old history back;
+- GitHub-hosted orphaned objects, caches, or pull-request refs are outside active branch history and may require GitHub platform/support cleanup if they remain directly accessible.
