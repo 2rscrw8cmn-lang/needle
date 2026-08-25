@@ -12,115 +12,75 @@ The roadmap defines phase outcomes. GitHub issues define bounded implementation 
 
 # Phase 0 — Foundation
 
+**Status: COMPLETE**
+
 ## Goal
 
 Agree on what Needle is, what the source data means, how identity/evidence work, and what visual/technical constraints agents must honor before app code begins.
 
-### 0.01 Dataset audit
+### 0.01 Dataset audit — complete
 
-Status: **documented; core audit complete**
+- private source-data home: `data/history/`;
+- raw JSON/workbook ignored and absent from active Git history;
+- date audit resolved; actual current workbook range ends 2026-08-23;
+- privacy/minimization requirements documented.
 
-Deliverable: `DATA_AUDIT.md`
+### 0.02 Canonical data model — accepted
 
-Resolved:
-
-- raw source data has a local-only home at `data/history/`;
-- raw JSON files and the analysis workbook are no longer tracked on the Phase 0 branch;
-- the apparent October 2026 session was an audit conversion error; the actual latest session is 2026-08-23;
-- source-field privacy/minimization requirements are documented.
-
-Remaining:
-
-- decide whether to rewrite old Git history / otherwise remediate the previously public source commits;
-- verify final import inventory/counts when the production importer is implemented.
-
-### 0.02 Canonical data model
-
-Status: **proposed foundation**
-
-Deliverable: `DATA_MODEL.md`
-
-Exit checks:
-
-- canonical Album separate from AlbumEdition;
+- Album separate from AlbumEdition;
 - PlaybackEvent separate from AlbumSession;
 - PersonalAlbumState protected from reimport;
-- archive membership not conflated with ingestion.
+- archive membership separate from ingestion/evidence.
 
-### 0.03 History analysis → product
+### 0.03 History analysis → product — complete
 
-Status: **documented**
+See `HISTORY_ANALYSIS.md`.
 
-Deliverable: `HISTORY_ANALYSIS.md`
+### 0.04 Product + information architecture — complete
 
-### 0.04 Product + information architecture
+See `PRODUCT.md` and `INFORMATION_ARCHITECTURE.md`.
 
-Status: **documented**
+### 0.05 Visual system — complete
 
-Deliverables:
+See `DESIGN.md` and `reference/needle-design-inspiration.jpg`.
 
-- `PRODUCT.md`
-- `INFORMATION_ARCHITECTURE.md`
+### 0.06 Import architecture — accepted
 
-### 0.05 Visual system
+See `IMPORT_PIPELINE.md`.
 
-Status: **documented**
+### 0.07 Technical architecture — accepted
 
-Deliverables:
+See `TECHNICAL_ARCHITECTURE.md` and D-011 in `DECISIONS.md`.
 
-- `DESIGN.md`
-- `reference/needle-design-inspiration.jpg`
+Accepted stack:
 
-### 0.06 Import architecture
+- Next.js + TypeScript;
+- Cloudflare Workers;
+- Cloudflare D1;
+- GitHub-connected Cloudflare previews/deployments;
+- local Node.js/TypeScript private-history importer;
+- Spotify as the primary catalog provider;
+- D1/SQL search first;
+- R2 only when a concrete non-Spotify need exists.
 
-Status: **proposed foundation**
+### 0.08 Roadmap + agent contract — complete
 
-Deliverable: `IMPORT_PIPELINE.md`
-
-### 0.07 Technical architecture
-
-Status: **not selected**
-
-Decide after the data/product contracts are accepted. Record:
-
-- web framework/runtime;
-- database;
-- hosting;
-- import execution environment;
-- artwork/Spotify metadata enrichment;
-- genre enrichment source;
-- search/filter approach;
-- image caching strategy;
-- deployment environments;
-- secrets/private-source-data handling.
-
-Do not choose technology solely because another project uses it.
-
-### 0.08 Roadmap + agent contract
-
-Status: **documented**
-
-Deliverables:
-
-- `START_HERE.md`
-- `AGENTS.md`
-- `DECISIONS.md`
-- this roadmap.
+See `START_HERE.md`, `AGENTS.md`, `DECISIONS.md`, and this roadmap.
 
 ## Phase 0 exit gate
 
-Application scaffolding may begin when all are true:
+- [x] private/local source-data path defined;
+- [x] date-range audit resolved;
+- [x] active Git branch history rewritten to a clean sanitized root;
+- [x] archive membership threshold accepted: at least one Full or Near-Complete qualifying session;
+- [x] canonical Album/Edition model accepted;
+- [x] 10-category Music Type taxonomy accepted;
+- [x] Spotify selected as primary metadata/enrichment provider;
+- [x] technical architecture recorded;
+- [x] approved design reference committed;
+- [x] Phase 1 issues created and bounded.
 
-- [x] private/local source-data path is defined and source files are untracked on the Phase 0 branch;
-- [x] date-range audit is resolved;
-- [ ] historical Git/privacy remediation is explicitly accepted, deferred, or completed;
-- [ ] archive membership threshold is accepted;
-- [ ] canonical Album/Edition model is accepted;
-- [ ] Music Type taxonomy approach is accepted;
-- [ ] enrichment provider(s) are selected;
-- [ ] technical architecture is recorded in `DECISIONS.md`;
-- [x] approved design reference is committed;
-- [ ] Phase 1 issues are created and bounded.
+**Phase 1 may begin.**
 
 ---
 
@@ -128,62 +88,62 @@ Application scaffolding may begin when all are true:
 
 ## Goal
 
-Produce a deterministic Needle dataset from the private Spotify export.
+Produce a deterministic Needle dataset from the private Spotify export on the accepted Cloudflare architecture.
 
-Suggested issues:
+## Issue sequence
 
-### 1.01 Import manifest + raw validation
-- read `data/history/Streaming_History_Audio_*.json`;
-- validate schema/timestamps;
-- separate music from podcast/audiobook rows;
-- quarantine invalid/impossible future events;
-- emit an import report.
+### 1.00 — Scaffold Needle on Next.js + Cloudflare Workers + D1
+GitHub: #7
 
-### 1.02 Playback normalization
-- normalized UTC timestamps;
-- Spotify track identity;
-- deduplication rules;
-- minimized stored fields.
+Create the minimal production-shaped runtime, D1 binding/migrations, preview/deploy path, and test/typecheck baseline. Do not build product UI in this issue.
 
-### 1.03 Album sessionization
-- reproduce/validate workbook session behavior;
-- Full/Near/Sparse/Review classification;
-- deterministic tests.
+### 1.01 — Import manifest + raw history validation
+GitHub: #2
 
-### 1.04 Canonical album + edition resolution
-- Album vs AlbumEdition;
-- preferred Spotify edition;
-- ambiguity/review state;
-- validate against workbook Catalog Matches.
+Discover/validate `data/history/Streaming_History_Audio_*.json`, minimize fields, separate music/non-music, validate timestamps, and emit an import report.
 
-### 1.05 Catalog enrichment
-- artwork;
-- canonical/preferred release metadata;
-- genre source;
-- caching/persistence.
+### 1.02 — Normalize playback events
+GitHub: #3
 
-### 1.06 Music Type taxonomy
-- controlled taxonomy;
-- genre → Music Type mapping;
-- provenance;
-- manual overrides.
+Normalize accepted music rows, timestamps, Spotify identities, deduplication, and provenance without retaining unnecessary private metadata.
 
-### 1.07 Listener summaries + import validation
-- first/last heard;
-- session counts;
-- archive classification;
-- aggregate comparisons against workbook;
-- sanitized fixtures.
+### 1.03 — Reconstruct album listening sessions
+GitHub: #4
+
+Encode and validate Full / Near-Complete / Sparse / Review session behavior against the prior workbook.
+
+### 1.04 — Resolve canonical albums and Spotify editions
+GitHub: #5
+
+Implement Album vs AlbumEdition identity, edition ambiguity, confidence/review state, and workbook reconciliation.
+
+### 1.05 — Enrich resolved albums from Spotify
+GitHub: #6
+
+Fetch accepted Spotify catalog metadata/artwork URLs/destinations with resilient provider handling and required attribution/linkback.
+
+### 1.06 — Implement Music Type taxonomy and genre mapping
+GitHub: #8
+
+Implement the accepted 10-category taxonomy, detailed Genre separation, mapping provenance, unclassified states, and manual overrides.
+
+### 1.07 — Build listener summaries and reconcile the imported archive
+GitHub: #9
+
+Derive first/last listens, session counts, default Library membership, revisit inputs, PersonalAlbumState protection, and final workbook reconciliation.
 
 ## Phase 1 exit gate
 
+- [ ] Next.js app runs locally and in a Cloudflare Workers preview;
+- [ ] D1 schema/migrations are established;
 - [ ] importer is idempotent;
 - [ ] raw history can rebuild the derived dataset;
 - [ ] workbook-confirmed counts are reconciled or differences documented;
 - [ ] no raw IP/device metadata is in app tables;
-- [ ] Spotify links/artwork cover accepted archive records at target rate;
-- [ ] Music Type/Genre coverage meets accepted threshold;
-- [ ] PersonalAlbumState is isolated from reimport.
+- [ ] Spotify links/artwork metadata cover accepted archive records at the agreed rate;
+- [ ] Music Type/Genre coverage is measured and gaps are explicit;
+- [ ] PersonalAlbumState is isolated from reimport;
+- [ ] default Library membership implements D-009 exactly.
 
 ---
 
