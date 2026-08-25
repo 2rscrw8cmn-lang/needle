@@ -25,9 +25,11 @@ Core foundation docs:
 
 **Phase 1 — Data Foundation.**
 
-Issue **#7 / 1.00** establishes the runtime foundation only. The scaffold uses the Next.js App Router/API surface through **vinext**, Cloudflare's current recommended path for new Next.js-style applications on Workers, with Cloudflare D1 bound as `DB`.
+**1.00 is complete:** Needle is deployed on Cloudflare Workers with D1 bound as `DB` and the production health check passing.
 
-No Library/Home product UI is part of this scaffold.
+**1.01 adds the private-history validation entry point:** deterministic source discovery/fingerprinting, raw schema/timestamp validation, music vs podcast/audiobook separation, row quarantine, and privacy-minimized music output. It intentionally stops before playback-event normalization or album/session reconstruction.
+
+No Library/Home product UI is part of these foundation packages.
 
 ## Local scaffold
 
@@ -50,7 +52,15 @@ Quality gates:
 npm run check
 ```
 
-See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) before creating or deploying the remote D1 database.
+## Validate private Spotify history
+
+Place the Spotify extended-history JSON files in `data/history/`, then run:
+
+```bash
+npm run history:validate
+```
+
+Private validation outputs are written to `data/history/.needle/` and remain Git-ignored. See [`docs/IMPORT_PIPELINE.md`](docs/IMPORT_PIPELINE.md) for the exact whitelist, quarantine, and determinism contract.
 
 ## Accepted architecture
 
