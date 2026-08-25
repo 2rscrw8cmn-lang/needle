@@ -59,6 +59,15 @@ jobs:
           test -f /tmp/needle-history-validation/normalization-report.md
           node -e "const r=require('/tmp/needle-history-validation/normalization-report.json'); if(!r.ok || !r.reconciliation.matchesValidationReport || !r.reconciliation.balances) process.exit(1)"
 
+      - name: Reconstruct sanitized album sessions
+        run: |
+          npm run history:sessionize -- --input /tmp/needle-history-validation
+          test -f /tmp/needle-history-validation/album-sessions.json
+          test -f /tmp/needle-history-validation/provisional-albums.json
+          test -f /tmp/needle-history-validation/sessionization-report.json
+          test -f /tmp/needle-history-validation/sessionization-report.md
+          node -e "const r=require('/tmp/needle-history-validation/sessionization-report.json'); if(!r.ok || !r.reconciliation.matchesNormalizationReport || !r.reconciliation.positiveEventsBalance || !r.reconciliation.zeroMsEventsBalance) process.exit(1)"
+
       - name: Build
         run: npm run build
 

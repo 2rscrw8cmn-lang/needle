@@ -18,6 +18,7 @@
     "check": "npm run lint && npm run typecheck && npm run test && npm run build",
     "history:validate": "node --experimental-strip-types scripts/import-history.ts",
     "history:normalize": "node --experimental-strip-types scripts/normalize-history.ts",
+    "history:sessionize": "node --experimental-strip-types scripts/sessionize-history.ts",
     "db:migrate:local": "wrangler d1 migrations apply DB --local --persist-to .wrangler/state",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "db:verify:local": "wrangler d1 execute DB --local --persist-to .wrangler/state --command \"SELECT value FROM needle_meta WHERE key = 'schema_version';\""

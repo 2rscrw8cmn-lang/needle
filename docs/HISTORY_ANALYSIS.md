@@ -154,6 +154,21 @@ Needle should distinguish at least:
 
 Editorial Home/History stories should default to stronger evidence. Weak evidence may remain searchable/reviewable without being promoted as a meaningful album listen.
 
+## 1.03 encoded reference behavior
+
+Issue 1.03 replaces the workbook as the runtime sessionization dependency while keeping the workbook as a calibration reference.
+
+The encoded local evidence rules are documented in `SESSIONIZATION.md`: 30 seconds for meaningful track evidence, explicit skipped-state handling for credible coverage, Full/Near-Complete/Sparse/Review status, a 15-minute same-source-album gap boundary, and repeated qualifying evidence for provisional candidate selection.
+
+The current private-history calibration intentionally does not force an exact workbook match:
+
+- 401 provisional candidate albums versus 402 workbook candidates;
+- 2,035 Full/Near-Complete sessions versus 2,012 workbook session rows;
+- 1,302 Full sessions versus 1,324 locally complete workbook sessions;
+- 733 Near-Complete sessions versus 688 locally near-complete workbook sessions.
+
+The difference is recorded rather than hidden because 1.03 preserves provisional source album/title grouping. Some workbook grouping depends on title/edition decisions that belong to the later canonical Album / AlbumEdition stage.
+
 ## Analysis maintenance
 
 The workbook should be treated as a reference implementation, not the permanent runtime dependency.
