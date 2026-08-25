@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
@@ -19,9 +19,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Apply local D1 migrations
         run: npm run db:migrate:local
@@ -64,20 +65,3 @@ jobs:
           echo "Workers preview did not become healthy."
           cat /tmp/needle-wrangler.log
           exit 1
-
-      - name: Commit generated npm lockfile
-        if: github.event_name == 'pull_request' && github.head_ref == 'feat/1.00-cloudflare-scaffold'
-        shell: bash
-        run: |
-          if git ls-tree -r --name-only "${{ github.event.pull_request.head.sha }}" | grep -qx 'package-lock.json'; then
-            echo "package-lock.json is already tracked."
-            exit 0
-          fi
-
-          git fetch origin "${{ github.head_ref }}"
-          git switch -C "${{ github.head_ref }}" FETCH_HEAD
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          git commit -m "chore: lock scaffold dependencies"
-          git push origin "HEAD:${{ github.head_ref }}"
