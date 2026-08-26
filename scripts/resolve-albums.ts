@@ -8,6 +8,7 @@ import {
 import {
   createFixtureSpotifyCatalogProvider,
   createLiveSpotifyCatalogProvider,
+  type LiveSpotifyCatalogProviderHandle,
 } from "../lib/import/spotify-catalog.ts";
 
 function argValue(flag: string): string | undefined {
@@ -48,20 +49,30 @@ async function main(): Promise<void> {
   );
 
   const artifacts = await readStageThreeArtifacts(inputDir);
+  let liveProvider: LiveSpotifyCatalogProviderHandle | null = null;
   const provider = fixturePath
     ? await createFixtureSpotifyCatalogProvider(path.resolve(fixturePath))
-    : await createLiveSpotifyCatalogProvider({
+    : (liveProvider = await createLiveSpotifyCatalogProvider({
         clientId: process.env.SPOTIFY_CLIENT_ID ?? "",
         clientSecret: process.env.SPOTIFY_CLIENT_SECRET ?? "",
         market,
         cachePath,
-      });
+      }));
 
   const result = await resolveAlbumCatalog({
     artifacts,
     provider,
     providerName: fixturePath ? "fixture" : "spotify",
   });
+
+  const quotaState = liveProvider?.getQuotaState();
+  if (quotaState) {
+    const retryAt = quotaState.retryAt ? ` approximately ${quotaState.retryAt}` : " after the quota resets";
+    throw new Error(
+      `Spotify Development Mode quota exhausted. Cache preserved at ${cachePath}. Retry${retryAt}; partial resolution outputs were not written.`,
+    );
+  }
+
   await writeAlbumResolutionOutputs({ outputDir, result });
 
   console.log(renderAlbumResolutionReportMarkdown(result.report));
