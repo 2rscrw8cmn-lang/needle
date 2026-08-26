@@ -241,3 +241,28 @@ Work:
 ## V1 stop point
 
 After Phase 6, use Needle before adding major scope. Add ratings, Spotify sync/auth, playlists, or recommendation systems only if they solve an observed problem.
+
+---
+
+# Deferred / post-V1 opportunities
+
+These are intentionally **not active GitHub issues** yet. They are ideas worth preserving without pulling attention away from the current critical path.
+
+## Multi-user import scalability
+
+If Needle is opened to other listeners, keep the current import/resolution model but turn it into a production background workflow rather than a long-running local CLI task.
+
+Desired direction:
+
+- maintain a shared Needle catalog/cache of canonical albums, Spotify editions, track lists, artwork, and release metadata;
+- resolve catalog identities once and reuse them across users instead of repeating Spotify lookups for albums Needle already knows;
+- use Spotify track IDs from a new import to attach listening evidence to existing catalog records whenever confidence is strong;
+- query Spotify only for genuinely new or unresolved catalog identities;
+- make imports resumable/idempotent and safe to continue after rate limits or provider failures;
+- process work asynchronously with bounded concurrency and provider-aware backoff;
+- show visible progress while processing and allow the Library to populate incrementally before the entire import is finished;
+- surface unresolved/ambiguous albums as a review queue rather than blocking the whole import;
+- preserve strict per-user separation for listening history and PersonalAlbumState while sharing non-personal public catalog metadata;
+- target a typical history import in **minutes, not an hour-long blocking experience**, with later users benefiting from the catalog accumulated by earlier imports.
+
+The first personal Needle build may remain intentionally conservative/request-heavy while identity rules are being proven. Do not prematurely optimize Phase 1 at the expense of catalog correctness.
