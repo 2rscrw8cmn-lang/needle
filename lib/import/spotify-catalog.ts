@@ -16,6 +16,16 @@ interface SpotifyCatalogCache {
   albumTracks: Record<string, SpotifyTrackSummary[]>;
 }
 
+export interface SpotifyQuotaState {
+  reason: "QUOTA_EXCEEDED";
+  retryAfterSeconds: number;
+  retryAt: string | null;
+}
+
+export interface LiveSpotifyCatalogProviderHandle extends SpotifyCatalogProvider {
+  getQuotaState(): SpotifyQuotaState | null;
+}
+
 export interface LiveSpotifyCatalogOptions {
   clientId: string;
   clientSecret: string;
@@ -37,7 +47,7 @@ export interface FixtureCatalogFile {
 
 export async function createLiveSpotifyCatalogProvider(
   options: LiveSpotifyCatalogOptions,
-): Promise<SpotifyCatalogProvider> {
+): Promise<LiveSpotifyCatalogProviderHandle> {
   if (!options.clientId || !options.clientSecret) {
     throw new Error("Spotify catalog resolution requires SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET.");
   }
@@ -67,9 +77,10 @@ export async function createFixtureSpotifyCatalogProvider(
   };
 }
 
-class LiveSpotifyCatalogProvider implements SpotifyCatalogProvider {
+class LiveSpotifyCatalogProvider implements LiveSpotifyCatalogProviderHandle {
   private accessToken: string | null = null;
   private accessTokenExpiresAt = 0;
+  private quotaState: SpotifyQuotaState | null = null;
   private readonly fetchImpl: typeof fetch;
   private readonly options: LiveSpotifyCatalogOptions;
   private readonly cache: SpotifyCatalogCache;
@@ -80,10 +91,15 @@ class LiveSpotifyCatalogProvider implements SpotifyCatalogProvider {
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
 
+  getQuotaState(): SpotifyQuotaState | null {
+    return this.quotaState ? { ...this.quotaState } : null;
+  }
+
   async getTrack(trackId: string): Promise<SpotifyTrackLookup | null> {
     if (Object.prototype.hasOwnProperty.call(this.cache.tracks, trackId)) {
       return this.cache.tracks[trackId] ?? null;
     }
+    this.assertQuotaAvailable();
     const url = new URL(`https://api.spotify.com/v1/tracks/${encodeURIComponent(trackId)}`);
     url.searchParams.set("market", this.options.market);
     const response = await this.requestJson(url, { allowNotFound: true });
@@ -103,6 +119,7 @@ class LiveSpotifyCatalogProvider implements SpotifyCatalogProvider {
     if (Object.prototype.hasOwnProperty.call(this.cache.searches, key)) {
       return this.cache.searches[key] ?? [];
     }
+    this.assertQuotaAvailable();
     const url = new URL("https://api.spotify.com/v1/search");
     url.searchParams.set("q", `album:\"${query.album}\" artist:\"${query.artist}\"`);
     url.searchParams.set("type", "album");
@@ -119,6 +136,7 @@ class LiveSpotifyCatalogProvider implements SpotifyCatalogProvider {
     if (Object.prototype.hasOwnProperty.call(this.cache.albumTracks, albumId)) {
       return this.cache.albumTracks[albumId] ?? [];
     }
+    this.assertQuotaAvailable();
     const tracks: SpotifyTrackSummary[] = [];
     let offset = 0;
     for (;;) {
@@ -139,6 +157,10 @@ class LiveSpotifyCatalogProvider implements SpotifyCatalogProvider {
     this.cache.albumTracks[albumId] = tracks;
     await this.persistCache();
     return tracks;
+  }
+
+  private assertQuotaAvailable(): void {
+    if (this.quotaState) throw new Error(formatQuotaMessage(this.quotaState));
   }
 
   private async getAccessToken(): Promise<string> {
@@ -167,6 +189,7 @@ class LiveSpotifyCatalogProvider implements SpotifyCatalogProvider {
     url: URL,
     options: { allowNotFound?: boolean } = {},
   ): Promise<unknown | null> {
+    this.assertQuotaAvailable();
     let refreshedAfterUnauthorized = false;
     for (let attempt = 0; attempt < 5; attempt += 1) {
       const response = await this.fetchImpl(url, {
@@ -180,8 +203,17 @@ class LiveSpotifyCatalogProvider implements SpotifyCatalogProvider {
         continue;
       }
       if (response.status === 429) {
-        const retryAfter = Number(response.headers.get("retry-after") ?? "1");
-        await sleep(Math.min(60, Math.max(1, Number.isFinite(retryAfter) ? retryAfter : 1)) * 1000);
+        const retryAfter = parseRetryAfter(response.headers.get("retry-after"));
+        const body = await readJsonResponse(response);
+        if (spotifyErrorReason(body) === "QUOTA_EXCEEDED") {
+          this.quotaState = {
+            reason: "QUOTA_EXCEEDED",
+            retryAfterSeconds: retryAfter,
+            retryAt: retryAfter > 0 ? new Date(Date.now() + retryAfter * 1000).toISOString() : null,
+          };
+          throw new Error(formatQuotaMessage(this.quotaState));
+        }
+        await sleep(Math.min(60, Math.max(1, retryAfter)) * 1000);
         continue;
       }
       if (response.status >= 500 && attempt < 4) {
@@ -292,6 +324,32 @@ function assertFixture(value: unknown): asserts value is FixtureCatalogFile {
   if (value.albumTracks !== undefined && !isRecord(value.albumTracks)) {
     throw new Error("Catalog fixture albumTracks must be an object.");
   }
+}
+
+function parseRetryAfter(value: string | null): number {
+  const parsed = Number(value ?? "1");
+  return Math.max(1, Number.isFinite(parsed) ? Math.ceil(parsed) : 1);
+}
+
+async function readJsonResponse(response: Response): Promise<unknown> {
+  try {
+    return (await response.json()) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+function spotifyErrorReason(value: unknown): string | null {
+  return isRecord(value) && isRecord(value.error) && typeof value.error.reason === "string"
+    ? value.error.reason
+    : null;
+}
+
+function formatQuotaMessage(state: SpotifyQuotaState): string {
+  const retry = state.retryAt
+    ? ` Retry after ${state.retryAfterSeconds}s (approximately ${state.retryAt}).`
+    : "";
+  return `Spotify Development Mode quota exhausted (QUOTA_EXCEEDED).${retry}`;
 }
 
 function isRecord(value: unknown): value is Record<string, any> {
