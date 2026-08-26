@@ -39,6 +39,9 @@ jobs:
       - name: Test
         run: npm run test
 
+      - name: Verify album resolution CLI parses
+        run: npm run history:resolve-albums -- --help
+
       - name: Validate sanitized history fixture
         run: |
           npm run history:validate -- \
