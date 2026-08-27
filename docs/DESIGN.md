@@ -1,5 +1,17 @@
 # Design
 
+## Current execution contract
+
+The current Phase 2 UI is a **functional prototype**, not the final Needle visual system.
+
+The detailed next-pass design contract is:
+
+[`VISUAL_REDESIGN.md`](VISUAL_REDESIGN.md)
+
+That document defines the **Archive Editorial** direction, surface hierarchy, typography roles, artwork behavior, responsive rules, interaction language, and the implementation sequence for the redesign.
+
+This file remains the durable high-level visual contract. `VISUAL_REDESIGN.md` is the more specific execution plan for the current redesign program.
+
 ## Direction
 
 **Contemporary editorial music archive with a restrained vintage influence.**
@@ -11,6 +23,8 @@ The approved visual reference lives at:
 [`docs/reference/needle-design-inspiration.jpg`](reference/needle-design-inspiration.jpg)
 
 It establishes **mood, hierarchy, artwork scale, typography contrast, spacing, and editorial composition**. It is not a screen to trace literally.
+
+The additional 2026-08-27 Archive Editorial north-star exploration further clarifies the desired **density, page composition, archival micro-typography, horizontal artwork shelves, and year/history storytelling**. Its product-incompatible elements—persistent playback, fake vinyl, unsupported physical-format metadata, and fabricated taste claims—are explicitly excluded by `VISUAL_REDESIGN.md` and accepted product decisions.
 
 ## Primary rule
 
