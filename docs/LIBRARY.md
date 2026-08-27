@@ -16,7 +16,7 @@ albums.archive_member = 1
 listener_album_summaries.archive_member = 1
 ```
 
-This preserves D-009 at the product boundary: the default Library contains albums with at least one Full or Near-Complete qualifying session.
+This preserves D-009 at the product boundary: the default Library contains albums with qualifying Full or Near-Complete listening evidence.
 
 Sparse-only and unresolved review evidence may remain in importer/audit data but does not appear in the default cover wall, search results, filters, or sort views.
 
@@ -33,7 +33,7 @@ The Library query maps D1 rows into a product-facing album object containing:
 - first/last meaningful listen timestamps;
 - qualifying session count;
 - actual listening years;
-- repeat-qualifying-session state.
+- repeat-qualifying-session state retained for later history/detail use.
 
 The cover wall still displays only artwork, album title, and artist. History fields support collection controls and later Album detail without turning each tile into a statistics card.
 
@@ -42,7 +42,7 @@ The cover wall still displays only artwork, album title, and artist. History fie
 Library views are server-rendered and shareable. Supported query parameters are:
 
 ```text
-/library?q=<search>&sort=<sort>&decade=<YYYY>&heard=<YYYY>&repeat=1
+/library?q=<search>&sort=<sort>&decade=<YYYY>&heard=<YYYY>
 ```
 
 Invalid values are ignored or normalized to the safe default rather than interpolated into SQL.
@@ -66,6 +66,12 @@ Every sort includes stable artist/title/canonical-ID tie breakers.
 
 `revisited` is listening-history evidence, not an inferred rating or preference score.
 
+### Why there is no Revisited checkbox
+
+Phase 1.03 only promotes a provisional album after it has at least two Full/Near-Complete qualifying sessions. Phase 1.07 defines `repeat_qualifying_sessions` as that same `qualifying_session_count >= 2` threshold. Therefore the binary repeat flag does not discriminate among the current canonical Library candidates and is not useful as a filter.
+
+The **Most revisited** sort remains useful because it ranks albums by the actual qualifying-session count, then by the number of listening years and recency. It is intentionally different from a binary repeat filter.
+
 ### Release decade — `decade`
 
 The release-decade filter uses the album's known original release year. Available decades are derived from current D1 Library rows rather than hard-coded catalog values.
@@ -78,15 +84,9 @@ Listening-year filtering uses `listener_album_summaries.listening_years_json` an
 
 Available listening years are derived from current D1 evidence.
 
-### Revisited — `repeat=1`
-
-The Revisited filter requires `repeat_qualifying_sessions = 1`, which means the album has at least two qualifying Full/Near-Complete sessions according to the Phase 1 summary contract.
-
-It does not use a guessed affinity score.
-
 ## Query composition and SQL safety
 
-Search, decade, listening year, and repeat filters compose in one D1 query. Search patterns and numeric filter values are bound parameters. Only the accepted sort identifier selects a pre-authored ORDER BY clause.
+Search, decade, and listening-year filters compose in one D1 query. Search patterns and numeric filter values are bound parameters. Only the accepted sort identifier selects a pre-authored ORDER BY clause.
 
 No filter can widen results outside current D-009 membership.
 
