@@ -45,6 +45,9 @@ jobs:
       - name: Verify Spotify enrichment CLI parses
         run: npm run history:enrich-albums -- --help
 
+      - name: Verify Music Type taxonomy CLI parses
+        run: npm run history:classify-music-types -- --help
+
       - name: Validate sanitized history fixture
         run: |
           npm run history:validate -- \

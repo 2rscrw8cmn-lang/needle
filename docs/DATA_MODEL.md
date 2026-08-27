@@ -159,13 +159,11 @@ Suggested fields:
 - `name`
 - source/provenance
 
-Albums may have multiple genres.
+Albums may have multiple genres. Imported source genres remain intact even when they map into a broader Music Type.
 
 ### MusicType
 
-Broad, stable browsing taxonomy maintained by Needle.
-
-Examples to validate during Phase 0/1:
+Broad, stable browsing taxonomy maintained by Needle. Version 1 is the accepted ten-category system:
 
 - Rock
 - Pop
@@ -174,14 +172,13 @@ Examples to validate during Phase 0/1:
 - Electronic
 - Jazz
 - Country / Folk
-- Metal
-- Punk
-- Classical
-- Reggae / Caribbean
-- World / International
-- Soundtracks / Other
+- Heavy
+- Global
+- Classical / Soundtrack
 
-Music Type is not a replacement for Genre. An album should usually have one primary Music Type and may carry multiple detailed Genres.
+Music Type is not a replacement for Genre. An album should usually have one primary Music Type and may carry multiple detailed Genres. Missing or ambiguous genre evidence may leave an album unclassified; manual overrides remain separate from imported source evidence and must survive reimport.
+
+See `MUSIC_TYPE_TAXONOMY.md` for the versioned 1.06 mapping contract.
 
 ## Relationships
 
@@ -203,17 +200,7 @@ PlaybackEvent ──> Track ──> AlbumEdition ──> Album
 
 Ingestion and Library inclusion are intentionally separate.
 
-Needle should ingest/preserve all usable candidate evidence. The product can then decide which records appear by default.
-
-Provisional evidence classes from the current workbook:
-
-- confirmed complete at least twice;
-- confirmed once;
-- near-complete;
-- single-track/sparse;
-- review/ambiguous.
-
-**Do not hard-code the default Library threshold until it is accepted in `DECISIONS.md`.**
+Needle should ingest/preserve all usable candidate evidence. The default Library includes an album when there is at least one **Full or Near-Complete** qualifying album session, per accepted decision D-009. Sparse/single-track and unresolved review evidence remains stored without being promoted into the main Library.
 
 ## Canonical album vs edition behavior
 
@@ -242,9 +229,9 @@ Without adding special-purpose tables, this structure can support:
 
 ## Data invariants
 
-1. Reimporting raw history must not erase PersonalAlbumState.
+1. Reimporting raw history must not erase PersonalAlbumState or persistent manual Music Type overrides.
 2. Raw IP address must never be persisted into the app model.
 3. A session classification must retain enough provenance to explain/rebuild it.
 4. `spotify_album_id` belongs to an edition, not automatically to the canonical album.
-5. Genre/Music Type values must have provenance or a deterministic taxonomy rule.
+5. Genre/Music Type values must have provenance or a deterministic versioned taxonomy rule.
 6. Future-dated source/derived events must be quarantined until validated.
