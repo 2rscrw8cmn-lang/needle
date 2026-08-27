@@ -17,6 +17,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   return (
     <html lang="en">
       <body>
+        <a className="skip-link" href="#main-content">
+          Skip to content
+        </a>
         <div className="site-frame">
           <header className="site-header">
             <Link className="wordmark" href="/" aria-label="Needle home">
@@ -24,7 +27,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
             </Link>
             <SiteNav />
           </header>
-          <div className="site-content">{children}</div>
+          <div id="main-content" className="site-content">
+            {children}
+          </div>
         </div>
       </body>
     </html>
