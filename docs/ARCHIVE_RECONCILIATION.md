@@ -148,6 +148,8 @@ npm run db:migrate:remote
 npm run db:load-archive:remote
 ```
 
+The generated SQL intentionally omits explicit `BEGIN TRANSACTION` / `COMMIT` wrappers because Cloudflare D1's `wrangler d1 execute --file` import path manages statement execution itself and rejects nested explicit transaction wrappers. Do not add those wrappers back to `archive-import.sql`.
+
 Do not load a partial 1.04/1.05 run into remote D1.
 
 ## Reimport and PersonalAlbumState
