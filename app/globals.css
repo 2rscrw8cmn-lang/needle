@@ -253,6 +253,49 @@ select:focus-visible {
   text-transform: uppercase;
 }
 
+.album-artwork {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: var(--color-surface);
+}
+
+.album-artwork--thumbnail {
+  width: min(100%, 96px);
+}
+
+.album-artwork--grid {
+  width: 100%;
+}
+
+.album-artwork--feature {
+  width: min(100%, 720px);
+}
+
+.album-artwork__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.album-artwork--fallback {
+  border: var(--rule);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  color: var(--color-muted);
+}
+
+.album-artwork--fallback span {
+  font-family: var(--font-archive);
+  font-size: clamp(9px, 1vw, 11px);
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 @media (max-width: 720px) {
   :root {
     --page-gutter: 20px;
