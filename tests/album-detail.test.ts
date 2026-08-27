@@ -52,6 +52,7 @@ function createDatabase() {
       local_coverage, missing_local_track_count, import_batch_id
     ) VALUES
       ('ses_old', 'alb_a', '2020-01-01T00:00:00.000Z', '2020-01-01T00:40:00.000Z', 40, 'full', 10, 10, 1, 0, 'fixture'),
+      ('ses_sparse', 'alb_a', '2024-01-15T00:00:00.000Z', '2024-01-15T00:03:00.000Z', 3, 'sparse', 1, 1, 0.1, 9, 'fixture'),
       ('ses_new', 'alb_a', '2024-02-01T00:00:00.000Z', '2024-02-01T00:36:00.000Z', 36, 'near_complete', 9, 9, 0.9, 1, 'fixture');
   `);
 
@@ -70,11 +71,12 @@ describe("Album detail", () => {
     database.close();
   });
 
-  it("orders minimized sessions newest first", () => {
+  it("orders only qualifying minimized sessions newest first", () => {
     const database = createDatabase();
     const sessions = database.prepare(ALBUM_SESSION_SQL).all("alb_a") as unknown as AlbumSessionRow[];
 
     expect(sessions.map((session) => session.session_id)).toEqual(["ses_new", "ses_old"]);
+    expect(sessions.every((session) => session.evidence_status === "full" || session.evidence_status === "near_complete")).toBe(true);
     expect(ALBUM_SESSION_LIMIT).toBe(100);
     database.close();
   });
@@ -94,6 +96,7 @@ describe("Album detail", () => {
       qualifyingSessionCount: 3,
       fullSessionCount: 2,
       nearCompleteSessionCount: 1,
+      sparseSessionCount: 1,
       listeningYears: [2020, 2022, 2024],
     });
     expect(album.sessions[0]).toMatchObject({
