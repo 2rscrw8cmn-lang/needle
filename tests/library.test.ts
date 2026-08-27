@@ -3,8 +3,12 @@ import { DatabaseSync } from "node:sqlite";
 import { describe, expect, it } from "vitest";
 
 import {
+  LIBRARY_COUNT_SQL,
   LIBRARY_COVER_WALL_SQL,
+  LIBRARY_SEARCH_SQL,
+  librarySearchPattern,
   mapLibraryAlbumRow,
+  normalizeLibrarySearch,
   type LibraryAlbumRow,
 } from "../lib/library/library";
 
@@ -60,6 +64,40 @@ describe("Library cover wall query", () => {
     expect(rows.every((row) => row.qualifying_session_count > 0)).toBe(true);
 
     database.close();
+  });
+
+  it("counts only current D-009 archive members", () => {
+    const database = createDatabase();
+    const row = database.prepare(LIBRARY_COUNT_SQL).get() as { album_count: number };
+
+    expect(row.album_count).toBe(2);
+    database.close();
+  });
+
+  it("searches album title and artist case-insensitively while preserving membership", () => {
+    const database = createDatabase();
+
+    const byAlbum = database
+      .prepare(LIBRARY_SEARCH_SQL)
+      .all(librarySearchPattern("ALPHA"), librarySearchPattern("ALPHA")) as unknown as LibraryAlbumRow[];
+    expect(byAlbum.map((row) => row.canonical_album_id)).toEqual(["alb_a"]);
+
+    const byArtist = database
+      .prepare(LIBRARY_SEARCH_SQL)
+      .all(librarySearchPattern("beta artist"), librarySearchPattern("beta artist")) as unknown as LibraryAlbumRow[];
+    expect(byArtist.map((row) => row.canonical_album_id)).toEqual(["alb_b"]);
+
+    const hiddenSparse = database
+      .prepare(LIBRARY_SEARCH_SQL)
+      .all(librarySearchPattern("Sparse"), librarySearchPattern("Sparse")) as unknown as LibraryAlbumRow[];
+    expect(hiddenSparse).toEqual([]);
+
+    database.close();
+  });
+
+  it("escapes LIKE wildcard characters so search input is literal", () => {
+    expect(normalizeLibrarySearch("  100%_\\mix  ")).toBe("100%_\\mix");
+    expect(librarySearchPattern("100%_\\mix")).toBe("%100\\%\\_\\\\mix%");
   });
 
   it("maps runtime rows into the UI contract without leaking database field names", () => {
