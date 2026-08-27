@@ -44,7 +44,9 @@ SELECT
   local_coverage,
   missing_local_track_count
 FROM album_sessions
-WHERE canonical_album_id = ?
+WHERE
+  canonical_album_id = ?
+  AND evidence_status IN ('full', 'near_complete')
 ORDER BY started_at DESC, session_id DESC
 LIMIT ${ALBUM_SESSION_LIMIT}
 `;
