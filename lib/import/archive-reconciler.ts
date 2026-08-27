@@ -497,7 +497,6 @@ export function renderArchiveReconciliationReportMarkdown(report: ArchiveReconci
 export function renderArchiveImportSql(snapshot: RuntimeArchiveSnapshot): string {
   const statements: string[] = [
     "PRAGMA foreign_keys = ON;",
-    "BEGIN TRANSACTION;",
     `INSERT INTO import_batches (import_batch_id, archive_version, imported_at) VALUES (${sql(snapshot.import_batch_id)}, ${ARCHIVE_IMPORT_VERSION}, CURRENT_TIMESTAMP) ON CONFLICT(import_batch_id) DO UPDATE SET archive_version = excluded.archive_version, imported_at = excluded.imported_at;`,
     "UPDATE artists SET is_current = 0;",
     "UPDATE albums SET is_current = 0;",
@@ -550,7 +549,6 @@ export function renderArchiveImportSql(snapshot: RuntimeArchiveSnapshot): string
     );
   }
 
-  statements.push("COMMIT;");
   return `${statements.join("\n")}\n`;
 }
 
