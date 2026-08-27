@@ -51,6 +51,9 @@ jobs:
       - name: Verify archive reconciliation CLI parses
         run: npm run history:reconcile -- --help
 
+      - name: Verify cached archive preview CLI parses
+        run: npm run history:preview-cached -- --help
+
       - name: Validate sanitized history fixture
         run: |
           npm run history:validate -- \
