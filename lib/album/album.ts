@@ -21,10 +21,15 @@ SELECT
   s.distinct_listening_months,
   s.distinct_listening_years,
   s.listening_years_json,
-  s.evidence_span_days
+  s.evidence_span_days,
+  COALESCE(personal.favorite, 0) AS favorite,
+  COALESCE(personal.revisit, 0) AS revisit,
+  personal.notes AS review_text
 FROM albums AS a
 INNER JOIN listener_album_summaries AS s
   ON s.canonical_album_id = a.canonical_album_id
+LEFT JOIN personal_album_state AS personal
+  ON personal.canonical_album_id = a.canonical_album_id
 WHERE
   a.canonical_album_id = ?
   AND a.is_current = 1
@@ -51,6 +56,22 @@ ORDER BY started_at DESC, session_id DESC
 LIMIT ${ALBUM_SESSION_LIMIT}
 `;
 
+export const UPSERT_PERSONAL_ALBUM_STATE_SQL = `
+INSERT INTO personal_album_state (
+  canonical_album_id,
+  favorite,
+  revisit,
+  notes,
+  updated_at
+)
+VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+ON CONFLICT(canonical_album_id) DO UPDATE SET
+  favorite = excluded.favorite,
+  revisit = excluded.revisit,
+  notes = excluded.notes,
+  updated_at = CURRENT_TIMESTAMP
+`;
+
 interface D1ResultLike<T> {
   results: T[];
 }
@@ -60,6 +81,7 @@ type D1BindingValue = string | number | null;
 interface D1PreparedStatementLike {
   bind(...values: D1BindingValue[]): D1PreparedStatementLike;
   all<T>(): Promise<D1ResultLike<T>>;
+  run(): Promise<unknown>;
 }
 
 export interface AlbumDatabase {
@@ -87,6 +109,9 @@ export interface AlbumDetailRow {
   distinct_listening_years: number;
   listening_years_json: string;
   evidence_span_days: number | null;
+  favorite: number;
+  revisit: number;
+  review_text: string | null;
 }
 
 export type AlbumEvidenceStatus = "full" | "near_complete" | "sparse" | "review";
@@ -115,6 +140,12 @@ export interface AlbumSessionEvidence {
   credibleUniqueTracks: number;
 }
 
+export interface PersonalAlbumState {
+  favorite: boolean;
+  revisit: boolean;
+  review: string;
+}
+
 export interface AlbumDetail {
   canonicalAlbumId: string;
   title: string;
@@ -137,6 +168,7 @@ export interface AlbumDetail {
   distinctListeningYears: number;
   listeningYears: number[];
   evidenceSpanDays: number | null;
+  personalState: PersonalAlbumState;
   sessions: AlbumSessionEvidence[];
   sessionLimit: number;
 }
@@ -163,9 +195,35 @@ export async function loadAlbumDetail(
   return mapAlbumDetailRow(row, sessionResult.results);
 }
 
+export async function savePersonalAlbumState(
+  database: AlbumDatabase,
+  rawAlbumId: string | null | undefined,
+  state: PersonalAlbumState,
+): Promise<boolean> {
+  const albumId = normalizeAlbumId(rawAlbumId);
+  if (!albumId) return false;
+
+  await database
+    .prepare(UPSERT_PERSONAL_ALBUM_STATE_SQL)
+    .bind(
+      albumId,
+      state.favorite ? 1 : 0,
+      state.revisit ? 1 : 0,
+      normalizeReview(state.review),
+    )
+    .run();
+  return true;
+}
+
 export function normalizeAlbumId(value: string | null | undefined): string {
   const normalized = value?.trim() ?? "";
   return normalized.length <= 200 ? normalized : "";
+}
+
+export function normalizeReview(value: string | null | undefined): string | null {
+  const normalized = value?.replace(/\r\n/g, "\n").trim() ?? "";
+  if (!normalized) return null;
+  return normalized.slice(0, 10000);
 }
 
 export function mapAlbumDetailRow(row: AlbumDetailRow, sessions: AlbumSessionRow[]): AlbumDetail {
@@ -191,6 +249,11 @@ export function mapAlbumDetailRow(row: AlbumDetailRow, sessions: AlbumSessionRow
     distinctListeningYears: row.distinct_listening_years,
     listeningYears: parseListeningYears(row.listening_years_json),
     evidenceSpanDays: row.evidence_span_days,
+    personalState: {
+      favorite: Number(row.favorite) === 1,
+      revisit: Number(row.revisit) === 1,
+      review: row.review_text ?? "",
+    },
     sessions: sessions.map(mapAlbumSessionRow),
     sessionLimit: ALBUM_SESSION_LIMIT,
   };
@@ -212,7 +275,7 @@ export function mapAlbumSessionRow(row: AlbumSessionRow): AlbumSessionEvidence {
 export function albumEvidenceLabel(status: AlbumEvidenceStatus): string {
   switch (status) {
     case "full":
-      return "Front-to-back listen";
+      return "Full Play";
     case "near_complete":
       return "Nearly complete listen";
     case "sparse":
