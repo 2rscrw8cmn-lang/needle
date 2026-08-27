@@ -22,9 +22,12 @@
     "history:resolve-albums": "node --env-file-if-exists=.env --experimental-strip-types scripts/resolve-albums.ts",
     "history:enrich-albums": "node --env-file-if-exists=.env --experimental-strip-types scripts/enrich-albums.ts",
     "history:classify-music-types": "node --experimental-strip-types scripts/classify-music-types.ts",
+    "history:reconcile": "node --experimental-strip-types scripts/reconcile-archive.ts",
     "db:migrate:local": "wrangler d1 migrations apply DB --local --persist-to .wrangler/state",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
-    "db:verify:local": "wrangler d1 execute DB --local --persist-to .wrangler/state --command \"SELECT value FROM needle_meta WHERE key = 'schema_version';\""
+    "db:verify:local": "wrangler d1 execute DB --local --persist-to .wrangler/state --command \"SELECT value FROM needle_meta WHERE key = 'schema_version';\"",
+    "db:load-archive:local": "wrangler d1 execute DB --local --persist-to .wrangler/state --file data/history/.needle/archive-import.sql",
+    "db:load-archive:remote": "wrangler d1 execute DB --remote --file data/history/.needle/archive-import.sql"
   },
   "dependencies": {
     "@vinext/cloudflare": "1.0.0-beta.4",
