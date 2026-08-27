@@ -37,6 +37,14 @@ export const LIBRARY_SEARCH_SQL = `${LIBRARY_SELECT}${LIBRARY_MEMBERSHIP_WHERE}
   )
 ${LIBRARY_ORDER}`;
 
+export const LIBRARY_COUNT_SQL = `
+SELECT COUNT(*) AS album_count
+FROM albums AS a
+INNER JOIN listener_album_summaries AS s
+  ON s.canonical_album_id = a.canonical_album_id
+${LIBRARY_MEMBERSHIP_WHERE}
+`;
+
 interface D1ResultLike<T> {
   results: T[];
 }
@@ -91,6 +99,11 @@ export async function loadLibraryAlbums(
     : database.prepare(LIBRARY_COVER_WALL_SQL);
   const result = await statement.all<LibraryAlbumRow>();
   return result.results.map(mapLibraryAlbumRow);
+}
+
+export async function countLibraryAlbums(database: LibraryDatabase): Promise<number> {
+  const result = await database.prepare(LIBRARY_COUNT_SQL).all<{ album_count: number }>();
+  return result.results[0]?.album_count ?? 0;
 }
 
 export function normalizeLibrarySearch(value: string | null | undefined): string {
