@@ -161,7 +161,6 @@ export interface LibraryQuery {
   sort?: string | null;
   decade?: string | number | null;
   listeningYear?: string | number | null;
-  repeatedOnly?: string | boolean | null;
 }
 
 export interface NormalizedLibraryQuery {
@@ -169,7 +168,6 @@ export interface NormalizedLibraryQuery {
   sort: LibrarySort;
   decade: number | null;
   listeningYear: number | null;
-  repeatedOnly: boolean;
 }
 
 export interface LibraryQueryPlan {
@@ -211,10 +209,6 @@ export function buildLibraryQuery(query: LibraryQuery = {}): LibraryQueryPlan {
     WHERE CAST(listening_year.value AS INTEGER) = ?
   )`);
     bindings.push(normalized.listeningYear);
-  }
-
-  if (normalized.repeatedOnly) {
-    clauses.push("s.repeat_qualifying_sessions = 1");
   }
 
   return {
@@ -266,7 +260,6 @@ export function normalizeLibraryQuery(query: LibraryQuery = {}): NormalizedLibra
     sort: normalizeLibrarySort(query.sort),
     decade: normalizeLibraryDecade(query.decade),
     listeningYear: normalizeLibraryListeningYear(query.listeningYear),
-    repeatedOnly: query.repeatedOnly === true || query.repeatedOnly === "1",
   };
 }
 
