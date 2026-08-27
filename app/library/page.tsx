@@ -99,7 +99,12 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
       ) : (
         <section className={styles.libraryGrid} aria-label={`${albums.length} albums in the Library`}>
           {albums.map((album) => (
-            <article className={styles.albumTile} key={album.canonicalAlbumId}>
+            <Link
+              className={styles.albumTile}
+              href={`/album/${encodeURIComponent(album.canonicalAlbumId)}`}
+              key={album.canonicalAlbumId}
+              aria-label={`${album.title} by ${album.artistName}`}
+            >
               <AlbumArtwork
                 src={album.artworkUrl}
                 albumTitle={album.title}
@@ -110,7 +115,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
                 <h2>{album.title}</h2>
                 <p>{album.artistName}</p>
               </div>
-            </article>
+            </Link>
           ))}
         </section>
       )}
