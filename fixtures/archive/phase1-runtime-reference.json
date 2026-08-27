@@ -1,0 +1,247 @@
+{
+  "version": 1,
+  "import_batch_id": "fixture-import-001",
+  "artists": [
+    {
+      "spotify_artist_id": "artist_alpha",
+      "name": "Alpha Artist",
+      "spotify_url": "https://open.spotify.test/artist/alpha"
+    },
+    {
+      "spotify_artist_id": "artist_beta",
+      "name": "Beta Artist",
+      "spotify_url": "https://open.spotify.test/artist/beta"
+    }
+  ],
+  "albums": [
+    {
+      "canonical_album_id": "alb_alpha",
+      "title": "Alpha Record",
+      "primary_artist_id": "artist_alpha",
+      "primary_artist_name": "Alpha Artist",
+      "original_release_date": "2019-01-01",
+      "preferred_edition_id": "edn_alpha",
+      "catalog_confidence": "high",
+      "catalog_review_status": "accepted",
+      "artwork_url": "https://image.test/alpha.jpg",
+      "spotify_url": "https://open.spotify.test/album/alpha",
+      "music_type": "Rock",
+      "music_type_status": "classified",
+      "taxonomy_version": 1,
+      "mapping_version": 1,
+      "archive_member": true
+    },
+    {
+      "canonical_album_id": "alb_beta",
+      "title": "Beta Record",
+      "primary_artist_id": "artist_beta",
+      "primary_artist_name": "Beta Artist",
+      "original_release_date": "2021",
+      "preferred_edition_id": "edn_beta",
+      "catalog_confidence": "medium",
+      "catalog_review_status": "accepted",
+      "artwork_url": null,
+      "spotify_url": "https://open.spotify.test/album/beta",
+      "music_type": null,
+      "music_type_status": "unclassified_no_genres",
+      "taxonomy_version": 1,
+      "mapping_version": 1,
+      "archive_member": false
+    }
+  ],
+  "editions": [
+    {
+      "edition_id": "edn_alpha",
+      "canonical_album_id": "alb_alpha",
+      "spotify_album_id": "sp_alb_alpha",
+      "title": "Alpha Record",
+      "release_date": "2019-01-01",
+      "edition_type": "standard",
+      "total_tracks": 10,
+      "is_preferred": true,
+      "match_confidence": "high",
+      "edition_ambiguity": false
+    },
+    {
+      "edition_id": "edn_alpha_deluxe",
+      "canonical_album_id": "alb_alpha",
+      "spotify_album_id": "sp_alb_alpha_deluxe",
+      "title": "Alpha Record (Deluxe)",
+      "release_date": "2020-01-01",
+      "edition_type": "deluxe",
+      "total_tracks": 12,
+      "is_preferred": false,
+      "match_confidence": "high",
+      "edition_ambiguity": false
+    },
+    {
+      "edition_id": "edn_beta",
+      "canonical_album_id": "alb_beta",
+      "spotify_album_id": "sp_alb_beta",
+      "title": "Beta Record",
+      "release_date": "2021",
+      "edition_type": "standard",
+      "total_tracks": 8,
+      "is_preferred": true,
+      "match_confidence": "medium",
+      "edition_ambiguity": false
+    }
+  ],
+  "tracks": [
+    {
+      "spotify_track_id": "track_alpha_1",
+      "canonical_album_id": "alb_alpha",
+      "edition_id": "edn_alpha",
+      "spotify_album_id": "sp_alb_alpha",
+      "name": "Alpha One",
+      "disc_number": 1,
+      "track_number": 1,
+      "duration_ms": 180000,
+      "explicit": false,
+      "spotify_url": "https://open.spotify.test/track/alpha1",
+      "artist_ids": ["artist_alpha"]
+    },
+    {
+      "spotify_track_id": "track_alpha_2",
+      "canonical_album_id": "alb_alpha",
+      "edition_id": "edn_alpha",
+      "spotify_album_id": "sp_alb_alpha",
+      "name": "Alpha Two",
+      "disc_number": 1,
+      "track_number": 2,
+      "duration_ms": 200000,
+      "explicit": false,
+      "spotify_url": "https://open.spotify.test/track/alpha2",
+      "artist_ids": ["artist_alpha"]
+    },
+    {
+      "spotify_track_id": "track_beta_1",
+      "canonical_album_id": "alb_beta",
+      "edition_id": "edn_beta",
+      "spotify_album_id": "sp_alb_beta",
+      "name": "Beta One",
+      "disc_number": 1,
+      "track_number": 1,
+      "duration_ms": 210000,
+      "explicit": true,
+      "spotify_url": "https://open.spotify.test/track/beta1",
+      "artist_ids": ["artist_beta"]
+    }
+  ],
+  "sessions": [
+    {
+      "session_id": "session-alpha-2020",
+      "canonical_album_id": "alb_alpha",
+      "started_at": "2020-01-10T10:00:00.000Z",
+      "ended_at": "2020-01-10T10:40:00.000Z",
+      "session_minutes": 40,
+      "evidence_status": "full",
+      "meaningful_unique_tracks": 10,
+      "credible_unique_tracks": 10,
+      "local_coverage": 1,
+      "missing_local_track_count": 0
+    },
+    {
+      "session_id": "session-beta-sparse",
+      "canonical_album_id": "alb_beta",
+      "started_at": "2021-05-01T12:00:00.000Z",
+      "ended_at": "2021-05-01T12:10:00.000Z",
+      "session_minutes": 10,
+      "evidence_status": "sparse",
+      "meaningful_unique_tracks": 2,
+      "credible_unique_tracks": 2,
+      "local_coverage": 0.2,
+      "missing_local_track_count": 8
+    },
+    {
+      "session_id": "session-alpha-2022",
+      "canonical_album_id": "alb_alpha",
+      "started_at": "2022-03-12T10:00:00.000Z",
+      "ended_at": "2022-03-12T10:35:00.000Z",
+      "session_minutes": 35,
+      "evidence_status": "near_complete",
+      "meaningful_unique_tracks": 9,
+      "credible_unique_tracks": 9,
+      "local_coverage": 0.9,
+      "missing_local_track_count": 1
+    },
+    {
+      "session_id": "session-alpha-deluxe-2024",
+      "canonical_album_id": "alb_alpha",
+      "started_at": "2024-06-15T10:00:00.000Z",
+      "ended_at": "2024-06-15T10:45:00.000Z",
+      "session_minutes": 45,
+      "evidence_status": "full",
+      "meaningful_unique_tracks": 10,
+      "credible_unique_tracks": 10,
+      "local_coverage": 1,
+      "missing_local_track_count": 0
+    }
+  ],
+  "summaries": [
+    {
+      "canonical_album_id": "alb_alpha",
+      "archive_member": true,
+      "archive_rule": "full_or_near_complete_v1",
+      "first_meaningful_listen_at": "2020-01-10T10:00:00.000Z",
+      "last_meaningful_listen_at": "2024-06-15T10:45:00.000Z",
+      "qualifying_session_count": 3,
+      "full_session_count": 2,
+      "near_complete_session_count": 1,
+      "sparse_session_count": 0,
+      "review_session_count": 0,
+      "total_session_count": 3,
+      "distinct_listening_months": 3,
+      "distinct_listening_years": 3,
+      "listening_months": ["2020-01", "2022-03", "2024-06"],
+      "listening_years": [2020, 2022, 2024],
+      "evidence_span_days": 1618,
+      "source_album_count": 2,
+      "revisit_inputs": {
+        "repeat_qualifying_sessions": true,
+        "spans_multiple_months": true,
+        "spans_multiple_years": true,
+        "spans_at_least_one_year": true
+      }
+    },
+    {
+      "canonical_album_id": "alb_beta",
+      "archive_member": false,
+      "archive_rule": "full_or_near_complete_v1",
+      "first_meaningful_listen_at": null,
+      "last_meaningful_listen_at": null,
+      "qualifying_session_count": 0,
+      "full_session_count": 0,
+      "near_complete_session_count": 0,
+      "sparse_session_count": 1,
+      "review_session_count": 0,
+      "total_session_count": 1,
+      "distinct_listening_months": 0,
+      "distinct_listening_years": 0,
+      "listening_months": [],
+      "listening_years": [],
+      "evidence_span_days": null,
+      "source_album_count": 1,
+      "revisit_inputs": {
+        "repeat_qualifying_sessions": false,
+        "spans_multiple_months": false,
+        "spans_multiple_years": false,
+        "spans_at_least_one_year": false
+      }
+    }
+  ],
+  "genres": [
+    {
+      "genre_key": "alternative rock",
+      "name": "alternative rock",
+      "music_type": "Rock",
+      "mapping_status": "mapped"
+    }
+  ],
+  "album_genres": [
+    {
+      "canonical_album_id": "alb_alpha",
+      "genre_key": "alternative rock"
+    }
+  ]
+}
