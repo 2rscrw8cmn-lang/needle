@@ -5,6 +5,7 @@ import {
   type MusicType,
   type MusicTypeTaxonomyReport,
 } from "../taxonomy/music-types.ts";
+import type { AlbumSession, SessionizationReport } from "./album-sessionizer.ts";
 import {
   normalizeLabel,
   type AlbumResolutionResult,
@@ -172,8 +173,8 @@ export function buildCachedArchivePreview(options: {
   };
 
   const artifacts: ArchiveReconciliationArtifacts = {
-    sessionizationReport: options.stageThree.report,
-    sessions: options.stageThree.sessions,
+    sessionizationReport: options.stageThree.report as unknown as SessionizationReport,
+    sessions: options.stageThree.sessions as unknown as AlbumSession[],
     canonicalAlbums: options.resolution.canonicalAlbums,
     editions: options.resolution.editions,
     resolutionLinks: options.resolution.links,
