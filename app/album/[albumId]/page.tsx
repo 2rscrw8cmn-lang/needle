@@ -37,6 +37,8 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
     return <AlbumNotFound />;
   }
 
+  const otherEvidenceCount = album.sparseSessionCount + album.reviewSessionCount;
+
   return (
     <main className={styles.albumPage}>
       <div className={styles.backRow}>
@@ -110,18 +112,22 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
       <section className={styles.timelineSection} aria-labelledby="timeline-title">
         <div className={styles.timelineHeading}>
           <div>
-            <p className="archive-label">Evidence timeline</p>
-            <h2 id="timeline-title">Sessions</h2>
+            <p className="archive-label">Listening evidence</p>
+            <h2 id="timeline-title">Qualifying listens</h2>
           </div>
           <p className={styles.timelineCount}>
-            {album.sessions.length < album.totalSessionCount
-              ? `Latest ${album.sessions.length} of ${album.totalSessionCount}`
-              : `${album.totalSessionCount.toLocaleString()} total`}
+            {formatQualifyingCount(album.sessions.length, album.qualifyingSessionCount)}
           </p>
         </div>
 
+        {otherEvidenceCount > 0 ? (
+          <p className={styles.timelineNote}>
+            {otherEvidenceCount.toLocaleString()} brief or uncertain {otherEvidenceCount === 1 ? "appearance is" : "appearances are"} summarized above rather than listed here.
+          </p>
+        ) : null}
+
         {album.sessions.length === 0 ? (
-          <p className={styles.noSessions}>No minimized session evidence is available for this record.</p>
+          <p className={styles.noSessions}>No qualifying listening sessions are available for this record.</p>
         ) : (
           <ol className={styles.timelineList}>
             {album.sessions.map((session) => (
@@ -187,6 +193,11 @@ function formatYearSpan(years: number[]): string {
   if (years.length === 0) return "—";
   if (years.length === 1) return String(years[0]);
   return `${years[0]}–${years[years.length - 1]}`;
+}
+
+function formatQualifyingCount(visible: number, total: number): string {
+  if (visible < total) return `Latest ${visible.toLocaleString()} of ${total.toLocaleString()}`;
+  return `${total.toLocaleString()} ${total === 1 ? "qualifying listen" : "qualifying listens"}`;
 }
 
 function formatSessionContext(minutes: number, tracks: number): string {
