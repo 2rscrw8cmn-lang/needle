@@ -7,6 +7,7 @@ import {
   loadHistoryYear,
   loadHistoryYears,
   resolveHistoryYear,
+  type HistoryAlbum,
   type HistoryYearView,
 } from "../../lib/history/history";
 import styles from "./history.module.css";
@@ -72,7 +73,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
           <h2 id="year-title">{selectedYear}</h2>
         </div>
         <p className={styles.yearStatement}>
-          {history.totals.albums.toLocaleString()} {history.totals.albums === 1 ? "record" : "records"} with qualifying listening evidence.
+          {history.totals.albums.toLocaleString()} {history.totals.albums === 1 ? "record" : "records"} with meaningful album listening evidence.
         </p>
       </section>
 
@@ -80,12 +81,12 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
         <SummaryItem label="Albums" value={history.totals.albums} />
         <SummaryItem label="First heard" value={history.totals.firstHeard} />
         <SummaryItem label="Revisited" value={history.totals.revisited} />
-        <SummaryItem label="Qualifying listens" value={history.totals.qualifyingListens} />
+        <SummaryItem label={fullPlayLabel(history.totals.fullPlays)} value={history.totals.fullPlays} />
       </dl>
 
       {history.albums.length === 0 ? (
         <section className={styles.historyState}>
-          <p className="archive-label">No qualifying records</p>
+          <p className="archive-label">No records</p>
           <h2>No albums reached the History view for {selectedYear}.</h2>
         </section>
       ) : (
@@ -103,7 +104,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
                   <p className={styles.albumEvidence}>
                     {album.firstHeardInYear ? "First heard" : "Revisited"}
                     <span>·</span>
-                    {album.yearQualifyingSessionCount} {album.yearQualifyingSessionCount === 1 ? "listen" : "listens"}
+                    {formatYearEvidence(album)}
                   </p>
                   <h3>{album.title}</h3>
                   <p>{album.artistName}</p>
@@ -126,11 +127,26 @@ function SummaryItem({ label, value }: { label: string; value: number }) {
   );
 }
 
+function fullPlayLabel(count: number): string {
+  return count === 1 ? "Full Play" : "Full Plays";
+}
+
+function formatYearEvidence(album: HistoryAlbum): string {
+  const parts: string[] = [];
+  if (album.yearFullPlayCount > 0) {
+    parts.push(`${album.yearFullPlayCount} ${fullPlayLabel(album.yearFullPlayCount)}`);
+  }
+  if (album.yearNearCompleteCount > 0) {
+    parts.push(`${album.yearNearCompleteCount} nearly complete`);
+  }
+  return parts.join(" · ") || "Listening evidence";
+}
+
 function HistoryEmpty() {
   return (
     <main className={styles.historyState}>
       <p className="archive-label">No listening history yet</p>
-      <h1>History will appear when the archive has qualifying album listens.</h1>
+      <h1>History will appear when the archive has meaningful album listening evidence.</h1>
       <Link href="/library">Return to Library</Link>
     </main>
   );
