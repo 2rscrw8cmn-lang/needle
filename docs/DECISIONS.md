@@ -232,3 +232,26 @@ Current scaffold conventions:
 - D1 migration directory: `/migrations`;
 - runtime verification route: `/api/health`;
 - remote D1 UUID is added to `wrangler.jsonc` after the real Cloudflare database is created.
+
+---
+
+## D-018 — Archive Editorial visual redesign
+
+**Status:** Accepted
+
+The current Phase 2 interface is a **functional prototype**, not the final visual target.
+
+The next visual pass follows the **Archive Editorial** contract in [`VISUAL_REDESIGN.md`](VISUAL_REDESIGN.md):
+
+- artwork is the dominant visual material and primary source of color;
+- the experience should feel like a contemporary music annual / personal record archive rather than a configured SaaS product;
+- Home and History may use dense, asymmetric editorial compositions;
+- Library remains systematic, fast, and artwork-first;
+- Album detail should read like a digital sleeve/liner-note page;
+- expressive serif, modern sans, and restrained archival microtype have distinct roles;
+- warm neutral canvas, graphite text, hairline rules, and minimal interface accent remain the base visual language;
+- the accessibility/responsive guarantees established in 2.11 must survive the redesign.
+
+The visual reference is a **composition and mood source, not a product feature specification**. Explicitly do not copy its persistent playback UI, fake vinyl object, unsupported physical-format metadata, fabricated favorite/taste claims, or decorative archive stamps that are not grounded in real stored data.
+
+The redesign should be implemented as bounded surface/primitives issues rather than a single sweeping CSS rewrite.
