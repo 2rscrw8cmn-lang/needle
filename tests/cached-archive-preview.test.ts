@@ -32,7 +32,7 @@ async function writeCache(market = "US") {
         track_alpha: { id: "track_alpha", name: "Alpha One", album },
       },
       searches: {
-        [`alpha artist\u241falpha record\u241f10`]: [album],
+        [`alphaartist\u241falpharecord\u241f10`]: [album],
       },
       albumTracks: {
         album_alpha: [{ id: "track_alpha", name: "Alpha One" }],
