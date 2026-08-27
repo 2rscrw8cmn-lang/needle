@@ -185,7 +185,7 @@ export interface LibraryFacets {
 
 export function buildLibraryQuery(query: LibraryQuery = {}): LibraryQueryPlan {
   const normalized = normalizeLibraryQuery(query);
-  const clauses = [...LIBRARY_MEMBERSHIP];
+  const clauses: string[] = [...LIBRARY_MEMBERSHIP];
   const bindings: D1BindingValue[] = [];
 
   if (normalized.search) {
