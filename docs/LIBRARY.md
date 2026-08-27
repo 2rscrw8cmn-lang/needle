@@ -16,13 +16,13 @@ albums.archive_member = 1
 listener_album_summaries.archive_member = 1
 ```
 
-This preserves D-009 at the product boundary: the default Library contains albums with at least one Full or Near-Complete qualifying session.
+This preserves D-009 at the product boundary: the default Library contains albums with qualifying Full or Near-Complete listening evidence.
 
-Sparse-only and unresolved review evidence may remain in importer/audit data but does not appear in the default cover wall or search results.
+Sparse-only and unresolved review evidence may remain in importer/audit data but does not appear in the default cover wall, search results, filters, or sort views.
 
 ## Current row contract
 
-The query returns enough data for the artwork wall and later Library controls without exposing database column naming directly to components:
+The Library query maps D1 rows into a product-facing album object containing:
 
 - stable canonical album ID;
 - album title;
@@ -31,60 +31,82 @@ The query returns enough data for the artwork wall and later Library controls wi
 - provider artwork URL;
 - Music Type when available;
 - first/last meaningful listen timestamps;
-- qualifying session count.
+- qualifying session count;
+- actual listening years;
+- repeat-qualifying-session state retained for later history/detail use.
 
-The cover wall currently displays only artwork, album title, and artist. Other fields are intentionally retained in the UI row contract for later sorting/filtering/history-aware work rather than adding visible metadata everywhere now.
+The cover wall still displays only artwork, album title, and artist. History fields support collection controls and later Album detail without turning each tile into a statistics card.
 
-## Search
+## URL state
 
-Issue 2.04 adds search through the shareable URL parameter:
+Library views are server-rendered and shareable. Supported query parameters are:
 
 ```text
-/library?q=<query>
+/library?q=<search>&sort=<sort>&decade=<YYYY>&heard=<YYYY>
 ```
 
-Search checks:
+Invalid values are ignored or normalized to the safe default rather than interpolated into SQL.
 
-- album title;
-- primary artist name.
+### Search — `q`
 
-Matching is case-insensitive substring matching inside the current D-009 Library only. Search never widens the result set to sparse, review-only, or inactive albums.
+Search checks album title and primary artist name using case-insensitive substring matching. `%`, `_`, and backslash are escaped so they remain literal input. Search values are bound D1 parameters.
 
-User input is passed to D1 through bound parameters. `%`, `_`, and backslash are escaped before building the `LIKE` pattern so those characters remain literal user input rather than SQL wildcard syntax.
+### Sort — `sort`
 
-Search is intentionally simple in V1 at this stage:
+Sort is a fixed whitelist, never arbitrary SQL:
 
-- no fuzzy matching;
-- no semantic/vector search;
-- no autocomplete;
-- no external search service;
-- no Genre/Music Type text search yet.
+- `artist` — Artist A–Z; default;
+- `album` — Album A–Z;
+- `release` — release year, newest first, unknown dates last;
+- `recent` — most recently meaningfully listened first;
+- `first` — earliest first meaningful listen first;
+- `revisited` — qualifying-session count first, then listening-year span and recency.
 
-A copied/reloaded `/library?q=...` URL recreates the same search state without client-side state storage.
+Every sort includes stable artist/title/canonical-ID tie breakers.
+
+`revisited` is listening-history evidence, not an inferred rating or preference score.
+
+### Why there is no Revisited checkbox
+
+Phase 1.03 only promotes a provisional album after it has at least two Full/Near-Complete qualifying sessions. Phase 1.07 defines `repeat_qualifying_sessions` as that same `qualifying_session_count >= 2` threshold. Therefore the binary repeat flag does not discriminate among the current canonical Library candidates and is not useful as a filter.
+
+The **Most revisited** sort remains useful because it ranks albums by the actual qualifying-session count, then by the number of listening years and recency. It is intentionally different from a binary repeat filter.
+
+### Release decade — `decade`
+
+The release-decade filter uses the album's known original release year. Available decades are derived from current D1 Library rows rather than hard-coded catalog values.
+
+An album with no known release date does not match a decade filter.
+
+### Listening year — `heard`
+
+Listening-year filtering uses `listener_album_summaries.listening_years_json` and SQLite `json_each`. It answers “which Library albums did I meaningfully listen to in this year?” and is intentionally independent of release year.
+
+Available listening years are derived from current D1 evidence.
+
+## Query composition and SQL safety
+
+Search, decade, and listening-year filters compose in one D1 query. Search patterns and numeric filter values are bound parameters. Only the accepted sort identifier selects a pre-authored ORDER BY clause.
+
+No filter can widen results outside current D-009 membership.
+
+## Music Type and Genre boundary
+
+Music Type and Genre controls are deliberately absent from 2.05. The cached local preview currently has no real 1.05/1.06 classification coverage. Those controls should appear only after real coverage is available and reviewed; the UI must not imply taxonomy evidence that does not exist.
 
 ## Empty states
 
 Three states remain distinct:
 
 1. **empty archive** — D1 has no current D-009 Library members;
-2. **no search matches** — the archive has records, but the current `q` does not match album/artist;
+2. **no matches** — the archive has records, but the current search/filter combination returns none;
 3. **archive unavailable** — the D1 read failed.
 
-Needle never fills any of these states with fake sample albums.
-
-## Temporary default order
-
-Until 2.05 adds explicit user-selectable sorting, the cover wall and search results use a deterministic collection-style order:
-
-1. primary artist name, case-insensitive;
-2. album title, case-insensitive;
-3. canonical album ID as a stable final tie-breaker.
-
-This is not intended to limit the eventual sort options.
+Needle never fills any state with fake sample albums.
 
 ## Layout
 
-The wall is systematic but not card-based:
+The collection control area stays thin and editorial rather than becoming a filter drawer or dashboard. The artwork wall remains the primary visual object:
 
 - large desktop: 7 columns;
 - medium desktop: 6 or 5 columns;
@@ -93,22 +115,21 @@ The wall is systematic but not card-based:
 
 There are no card backgrounds, permanent badges, stats, or controls around each cover. Album title and artist sit quietly below the artwork.
 
-`AlbumArtwork` from 2.02 owns image geometry/fallback behavior; the Library owns only grid placement and visible identity text.
+`AlbumArtwork` owns image geometry/fallback behavior; the Library owns grid placement and visible identity text.
 
 ## Runtime behavior
 
-`/library` is force-dynamic because it reads Cloudflare D1 at request time. Loading the approved Phase 1 `archive-import.sql` therefore makes real records appear without rebuilding or changing the route.
+`/library` is force-dynamic because it reads Cloudflare D1 at request time. Loading either the approved final archive or the explicitly local-only cached preview therefore updates the collection without rebuilding the page.
 
-The existing Cloudflare `env.DB` binding is the source of truth.
+The existing Cloudflare `env.DB` binding is the runtime source of truth.
 
 ## Deferred to later Library issues
 
 The current Library still defers:
 
-- filters;
-- user-selected sorting;
+- Music Type / Genre filters pending real enrichment coverage;
 - Album detail navigation/implementation;
-- Favorite/Revisit controls;
+- Favorite/Revisit personal controls;
 - listening-history timeline;
 - Open in Spotify.
 

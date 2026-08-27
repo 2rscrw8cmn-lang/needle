@@ -6,10 +6,16 @@ import {
   LIBRARY_COUNT_SQL,
   LIBRARY_COVER_WALL_SQL,
   LIBRARY_SEARCH_SQL,
+  buildLibraryQuery,
   librarySearchPattern,
   mapLibraryAlbumRow,
+  normalizeLibraryDecade,
+  normalizeLibraryListeningYear,
+  normalizeLibraryQuery,
   normalizeLibrarySearch,
+  normalizeLibrarySort,
   type LibraryAlbumRow,
+  type LibraryQuery,
 } from "../lib/library/library";
 
 function createDatabase() {
@@ -55,6 +61,14 @@ function createDatabase() {
   return database;
 }
 
+function runLibraryQuery(database: DatabaseSync, query: LibraryQuery): LibraryAlbumRow[] {
+  const plan = buildLibraryQuery(query);
+  const statement = database.prepare(plan.sql);
+  return (plan.bindings.length > 0
+    ? statement.all(...plan.bindings)
+    : statement.all()) as unknown as LibraryAlbumRow[];
+}
+
 describe("Library cover wall query", () => {
   it("returns only current D-009 archive members in deterministic artist/title order", () => {
     const database = createDatabase();
@@ -95,9 +109,39 @@ describe("Library cover wall query", () => {
     database.close();
   });
 
-  it("escapes LIKE wildcard characters so search input is literal", () => {
+  it("composes search, decade, and listening-year filters without widening membership", () => {
+    const database = createDatabase();
+
+    expect(runLibraryQuery(database, { decade: 1990 }).map((row) => row.canonical_album_id)).toEqual(["alb_a"]);
+    expect(runLibraryQuery(database, { listeningYear: 2021 }).map((row) => row.canonical_album_id)).toEqual(["alb_b"]);
+    expect(runLibraryQuery(database, { search: "record", decade: 1990, listeningYear: 2024 })
+      .map((row) => row.canonical_album_id)).toEqual(["alb_a"]);
+    expect(runLibraryQuery(database, { search: "Sparse" })).toEqual([]);
+
+    database.close();
+  });
+
+  it("supports only whitelisted deterministic sort orders", () => {
+    const database = createDatabase();
+
+    expect(runLibraryQuery(database, { sort: "release" }).map((row) => row.canonical_album_id)).toEqual(["alb_b", "alb_a"]);
+    expect(runLibraryQuery(database, { sort: "recent" }).map((row) => row.canonical_album_id)).toEqual(["alb_a", "alb_b"]);
+    expect(runLibraryQuery(database, { sort: "first" }).map((row) => row.canonical_album_id)).toEqual(["alb_a", "alb_b"]);
+    expect(runLibraryQuery(database, { sort: "revisited" }).map((row) => row.canonical_album_id)).toEqual(["alb_a", "alb_b"]);
+    expect(normalizeLibrarySort("DROP TABLE albums")).toBe("artist");
+
+    database.close();
+  });
+
+  it("normalizes URL-state values conservatively", () => {
     expect(normalizeLibrarySearch("  100%_\\mix  ")).toBe("100%_\\mix");
     expect(librarySearchPattern("100%_\\mix")).toBe("%100\\%\\_\\\\mix%");
+    expect(normalizeLibraryDecade("1990")).toBe(1990);
+    expect(normalizeLibraryDecade("1995")).toBeNull();
+    expect(normalizeLibraryListeningYear("2024")).toBe(2024);
+    expect(normalizeLibraryListeningYear("twenty24")).toBeNull();
+    expect(normalizeLibraryQuery({ sort: "recent", decade: "2000", listeningYear: "2021" }))
+      .toMatchObject({ sort: "recent", decade: 2000, listeningYear: 2021 });
   });
 
   it("maps runtime rows into the UI contract without leaking database field names", () => {
@@ -111,6 +155,8 @@ describe("Library cover wall query", () => {
       first_meaningful_listen_at: "2020-01-01T00:00:00.000Z",
       last_meaningful_listen_at: "2024-01-01T00:00:00.000Z",
       qualifying_session_count: 3,
+      listening_years_json: "[2020,2022,2024]",
+      repeat_qualifying_sessions: 1,
     });
 
     expect(mapped).toEqual({
@@ -124,6 +170,8 @@ describe("Library cover wall query", () => {
       firstMeaningfulListenAt: "2020-01-01T00:00:00.000Z",
       lastMeaningfulListenAt: "2024-01-01T00:00:00.000Z",
       qualifyingSessionCount: 3,
+      listeningYears: [2020, 2022, 2024],
+      repeated: true,
     });
   });
 });
