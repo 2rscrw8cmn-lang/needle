@@ -60,8 +60,7 @@
 }
 
 .librarySearch > label,
-.controlField > span,
-.repeatControl > span {
+.controlField > span {
   color: var(--color-muted);
   font-family: var(--font-archive);
   font-size: 9px;
@@ -99,7 +98,7 @@
   padding: 14px 0 16px;
   border-top: var(--rule);
   display: grid;
-  grid-template-columns: repeat(3, minmax(130px, 1fr)) minmax(110px, 0.7fr) auto;
+  grid-template-columns: repeat(3, minmax(130px, 1fr)) auto;
   gap: clamp(18px, 2.5vw, 38px);
   align-items: end;
 }
@@ -121,31 +120,6 @@
   color: var(--color-ink);
   font: inherit;
   font-size: 13px;
-}
-
-.repeatControl {
-  min-height: 39px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid var(--color-rule);
-  display: flex;
-  align-items: end;
-  gap: 9px;
-  cursor: pointer;
-}
-
-.repeatControl input {
-  width: 13px;
-  height: 13px;
-  margin: 0 0 1px;
-  accent-color: var(--color-ink);
-}
-
-.repeatControl > span {
-  color: var(--color-ink);
-  font-family: var(--font-ui);
-  font-size: 13px;
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 .controlActions {
@@ -252,7 +226,7 @@
 
 @media (max-width: 1100px) {
   .libraryFilterBar {
-    grid-template-columns: repeat(3, minmax(120px, 1fr)) minmax(100px, 0.8fr);
+    grid-template-columns: repeat(3, minmax(120px, 1fr));
   }
 
   .controlActions {
@@ -313,8 +287,7 @@
     gap: 18px 14px;
   }
 
-  .controlField select,
-  .repeatControl > span {
+  .controlField select {
     font-size: 12px;
   }
 
