@@ -6,9 +6,11 @@ import {
   ALBUM_DETAIL_SQL,
   ALBUM_SESSION_LIMIT,
   ALBUM_SESSION_SQL,
+  UPSERT_PERSONAL_ALBUM_STATE_SQL,
   albumEvidenceLabel,
   mapAlbumDetailRow,
   normalizeAlbumId,
+  normalizeReview,
   type AlbumDetailRow,
   type AlbumSessionRow,
 } from "../lib/album/album";
@@ -71,7 +73,7 @@ describe("Album detail", () => {
     database.close();
   });
 
-  it("orders only qualifying minimized sessions newest first", () => {
+  it("orders only Full and Near-Complete minimized sessions newest first", () => {
     const database = createDatabase();
     const sessions = database.prepare(ALBUM_SESSION_SQL).all("alb_a") as unknown as AlbumSessionRow[];
 
@@ -81,7 +83,7 @@ describe("Album detail", () => {
     database.close();
   });
 
-  it("maps archive rows into product-facing history", () => {
+  it("maps Full Plays separately from Near-Complete evidence", () => {
     const database = createDatabase();
     const row = database.prepare(ALBUM_DETAIL_SQL).get("alb_a") as unknown as AlbumDetailRow;
     const sessions = database.prepare(ALBUM_SESSION_SQL).all("alb_a") as unknown as AlbumSessionRow[];
@@ -98,6 +100,7 @@ describe("Album detail", () => {
       nearCompleteSessionCount: 1,
       sparseSessionCount: 1,
       listeningYears: [2020, 2022, 2024],
+      personalState: { favorite: false, revisit: false, review: "" },
     });
     expect(album.sessions[0]).toMatchObject({
       sessionId: "ses_new",
@@ -107,15 +110,37 @@ describe("Album detail", () => {
     database.close();
   });
 
-  it("uses readable evidence labels without exposing database jargon", () => {
-    expect(albumEvidenceLabel("full")).toBe("Front-to-back listen");
+  it("persists Favorite, Revisit, and Review using personal_album_state", () => {
+    const database = createDatabase();
+
+    database.prepare(UPSERT_PERSONAL_ALBUM_STATE_SQL).run("alb_a", 1, 1, "A record I keep returning to.");
+    let row = database.prepare(ALBUM_DETAIL_SQL).get("alb_a") as unknown as AlbumDetailRow;
+    let album = mapAlbumDetailRow(row, []);
+    expect(album.personalState).toEqual({
+      favorite: true,
+      revisit: true,
+      review: "A record I keep returning to.",
+    });
+
+    database.prepare(UPSERT_PERSONAL_ALBUM_STATE_SQL).run("alb_a", 0, 1, "Updated review");
+    row = database.prepare(ALBUM_DETAIL_SQL).get("alb_a") as unknown as AlbumDetailRow;
+    album = mapAlbumDetailRow(row, []);
+    expect(album.personalState).toEqual({ favorite: false, revisit: true, review: "Updated review" });
+    database.close();
+  });
+
+  it("uses product-facing evidence labels", () => {
+    expect(albumEvidenceLabel("full")).toBe("Full Play");
     expect(albumEvidenceLabel("near_complete")).toBe("Nearly complete listen");
     expect(albumEvidenceLabel("sparse")).toBe("Brief appearance");
     expect(albumEvidenceLabel("review")).toBe("Listening evidence");
   });
 
-  it("normalizes route IDs conservatively", () => {
+  it("normalizes route IDs and reviews conservatively", () => {
     expect(normalizeAlbumId("  alb_a  ")).toBe("alb_a");
     expect(normalizeAlbumId("x".repeat(201))).toBe("");
+    expect(normalizeReview("  Great record.  ")).toBe("Great record.");
+    expect(normalizeReview("   ")).toBeNull();
+    expect(normalizeReview("x".repeat(10001))?.length).toBe(10000);
   });
 });
