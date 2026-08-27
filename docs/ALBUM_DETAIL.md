@@ -35,12 +35,12 @@ The page follows the Information Architecture order:
 1. large artwork;
 2. album title, artist, release metadata, Music Type when available;
 3. listener-history summary;
-4. session/evidence timeline;
+4. qualifying-listen timeline;
 5. Spotify destination when enrichment provides one.
 
 Personal Favorite/Revisit/notes and related-record modules remain deferred.
 
-The current cached preview has 0% artwork, Spotify enrichment, and Music Type coverage. The detail page therefore treats those fields as optional and stays useful through identity and history evidence alone.
+The current cached preview may lack artwork, Music Type, and some enrichment fields. The detail page therefore treats those fields as optional and stays useful through identity and history evidence alone.
 
 ## Listener-history summary
 
@@ -68,13 +68,17 @@ Database statuses are translated into reader-facing language:
 | `sparse` | Brief appearance |
 | `review` | Listening evidence |
 
-A timeline row may include credible track count and approximate session duration as context. It does not expose raw event detail or technical coverage rules.
+The visible timeline intentionally lists only `full` and `near_complete` sessions. Sparse and Review evidence remains represented in the lifetime summary counts, but is not expanded into dozens of low-signal rows. This keeps Album detail focused on meaningful album-listening history rather than turning it into an importer audit log.
+
+A visible timeline row may include credible track count and approximate session duration as context. It does not expose raw event detail or technical coverage rules.
 
 ## Timeline bound
 
-The route loads the latest **100** minimized session rows, ordered newest first.
+The route loads the latest **100 qualifying** minimized session rows, ordered newest first.
 
-The listener summary remains the source for total counts, so the UI can say `Latest 100 of 245` without fetching hundreds of rows merely to render one page. The limit is a presentation/performance boundary; it does not alter Phase 1 evidence or counts.
+The listener summary remains the source for lifetime counts, including Sparse/Review evidence. If an album has more than 100 qualifying sessions, the UI can say `Latest 100 of 245` without fetching hundreds of rows merely to render one page.
+
+The limit is a presentation/performance boundary; it does not alter Phase 1 evidence or counts.
 
 ## Catalog uncertainty
 
