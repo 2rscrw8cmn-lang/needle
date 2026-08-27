@@ -66,6 +66,20 @@ Do not commit credentials. Client Credentials are used only for public catalog l
 
 The resolver uses observed Spotify track IDs, Spotify album search, artist/title evidence, and track-list overlap. Weak, compilation-risk, or ambiguous identities remain Review records instead of being forced by title equality.
 
+## 5. Enrich accepted albums from Spotify
+
+After 1.04 completes successfully:
+
+```bash
+npm run history:enrich-albums
+```
+
+1.05 enriches only accepted canonical albums and their preferred Spotify editions. It stores provider artwork references, Spotify destination URLs, release metadata, simplified artist identity, detailed track metadata, provenance, and enrichment timestamps.
+
+The enrichment stage is resumable through `spotify-enrichment-cache.json`. If Spotify Development Mode returns `QUOTA_EXCEEDED`, the command stops immediately, preserves the cache, and can be rerun after the reported retry time.
+
+Spotify artist genre metadata is currently deprecated. Needle does not spend additional quota fetching artists solely for that field; missing genre data stays explicit for 1.06 rather than being guessed.
+
 Generated outputs include:
 
 ```text
@@ -88,10 +102,17 @@ data/history/.needle/
 ├── album-resolution-review.json
 ├── album-resolution-report.json
 ├── album-resolution-report.md
-└── spotify-resolution-cache.json
+├── spotify-resolution-cache.json
+├── spotify-album-enrichment.json
+├── spotify-artist-enrichment.json
+├── spotify-track-enrichment.json
+├── spotify-enrichment-review.json
+├── spotify-enrichment-report.json
+├── spotify-enrichment-report.md
+└── spotify-enrichment-cache.json
 ```
 
-See `docs/SESSIONIZATION.md` for 1.03 and `docs/CATALOG_RESOLUTION.md` for the exact 1.04 identity contract.
+See `docs/SESSIONIZATION.md` for 1.03, `docs/CATALOG_RESOLUTION.md` for 1.04 identity, and `docs/SPOTIFY_ENRICHMENT.md` for the 1.05 enrichment contract.
 
 ## Privacy
 
@@ -99,7 +120,7 @@ Everything in this folder is ignored by Git except this README.
 
 The raw Spotify export can contain IP addresses, device/platform information, timestamps, country, listening behavior, and Spotify identifiers. Do not commit those files, the personal analysis workbook, generated `.needle/` outputs, or Spotify credentials.
 
-1.01 whitelists the private source fields needed for album-history reconstruction. 1.02–1.04 consume only minimized/derived artifacts and public Spotify catalog metadata; they do not reintroduce discarded IP/device/country/offline/incognito fields.
+1.01 whitelists the private source fields needed for album-history reconstruction. Later stages consume only minimized/derived artifacts and public Spotify catalog metadata; they do not reintroduce discarded IP/device/country/offline/incognito fields.
 
 ## Historical note
 
