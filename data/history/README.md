@@ -80,6 +80,24 @@ The enrichment stage is resumable through `spotify-enrichment-cache.json`. If Sp
 
 Spotify artist genre metadata is currently deprecated. Needle does not spend additional quota fetching artists solely for that field; missing genre data stays explicit for 1.06 rather than being guessed.
 
+## 6. Classify Genre → Music Type
+
+After 1.05 produces enrichment artifacts:
+
+```bash
+npm run history:classify-music-types
+```
+
+1.06 keeps detailed Genre separate from Needle's accepted ten broad Music Types and applies versioned deterministic mapping rules. Missing, unmapped, or tied genre evidence remains explicitly unclassified.
+
+Optional manual Music Type decisions live outside generated `.needle/` artifacts at:
+
+```text
+data/history/music-type-overrides.json
+```
+
+The classifier reads that file when present but never creates or overwrites it, so manual decisions survive reimports. Override targets use stable canonical album IDs.
+
 Generated outputs include:
 
 ```text
@@ -109,16 +127,20 @@ data/history/.needle/
 ├── spotify-enrichment-review.json
 ├── spotify-enrichment-report.json
 ├── spotify-enrichment-report.md
-└── spotify-enrichment-cache.json
+├── spotify-enrichment-cache.json
+├── album-music-type-classifications.json
+├── genre-catalog.json
+├── music-type-taxonomy-report.json
+└── music-type-taxonomy-report.md
 ```
 
-See `docs/SESSIONIZATION.md` for 1.03, `docs/CATALOG_RESOLUTION.md` for 1.04 identity, and `docs/SPOTIFY_ENRICHMENT.md` for the 1.05 enrichment contract.
+See `docs/SESSIONIZATION.md` for 1.03, `docs/CATALOG_RESOLUTION.md` for 1.04 identity, `docs/SPOTIFY_ENRICHMENT.md` for 1.05 enrichment, and `docs/MUSIC_TYPE_TAXONOMY.md` for the 1.06 taxonomy contract.
 
 ## Privacy
 
 Everything in this folder is ignored by Git except this README.
 
-The raw Spotify export can contain IP addresses, device/platform information, timestamps, country, listening behavior, and Spotify identifiers. Do not commit those files, the personal analysis workbook, generated `.needle/` outputs, or Spotify credentials.
+The raw Spotify export can contain IP addresses, device/platform information, timestamps, country, listening behavior, and Spotify identifiers. Do not commit those files, the personal analysis workbook, generated `.needle/` outputs, Spotify credentials, or personal Music Type override files.
 
 1.01 whitelists the private source fields needed for album-history reconstruction. Later stages consume only minimized/derived artifacts and public Spotify catalog metadata; they do not reintroduce discarded IP/device/country/offline/incognito fields.
 
