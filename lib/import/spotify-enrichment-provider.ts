@@ -61,11 +61,12 @@ class LiveSpotifyEnrichmentProvider implements SpotifyAlbumEnrichmentProvider {
   private quotaError: SpotifyEnrichmentQuotaExceededError | null = null;
   private readonly fetchImpl: typeof fetch;
   private readonly now: () => Date;
+  private readonly options: LiveSpotifyEnrichmentOptions;
+  private readonly cache: SpotifyEnrichmentCache;
 
-  constructor(
-    private readonly options: LiveSpotifyEnrichmentOptions,
-    private readonly cache: SpotifyEnrichmentCache,
-  ) {
+  constructor(options: LiveSpotifyEnrichmentOptions, cache: SpotifyEnrichmentCache) {
+    this.options = options;
+    this.cache = cache;
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.now = options.now ?? (() => new Date());
   }
