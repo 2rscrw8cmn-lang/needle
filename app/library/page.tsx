@@ -30,7 +30,6 @@ interface LibraryPageProps {
     sort?: SearchParamValue;
     decade?: SearchParamValue;
     heard?: SearchParamValue;
-    repeat?: SearchParamValue;
   }>;
 }
 
@@ -41,7 +40,6 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
     sort: firstParam(params.sort),
     decade: firstParam(params.decade),
     listeningYear: firstParam(params.heard),
-    repeatedOnly: firstParam(params.repeat),
   });
 
   let albums: LibraryAlbum[];
@@ -68,7 +66,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   }
 
   const hasFilters = Boolean(
-    query.search || query.decade !== null || query.listeningYear !== null || query.repeatedOnly,
+    query.search || query.decade !== null || query.listeningYear !== null,
   );
   const hasCustomView = hasFilters || query.sort !== "artist";
   const noArchive = totalCount === 0;
@@ -191,11 +189,6 @@ function LibraryControls({
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
-        </label>
-
-        <label className={styles.repeatControl}>
-          <input name="repeat" type="checkbox" value="1" defaultChecked={query.repeatedOnly} />
-          <span>Revisited</span>
         </label>
 
         <div className={styles.controlActions}>
