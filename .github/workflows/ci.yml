@@ -42,6 +42,9 @@ jobs:
       - name: Verify album resolution CLI parses
         run: npm run history:resolve-albums -- --help
 
+      - name: Verify Spotify enrichment CLI parses
+        run: npm run history:enrich-albums -- --help
+
       - name: Validate sanitized history fixture
         run: |
           npm run history:validate -- \
