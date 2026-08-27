@@ -48,6 +48,9 @@ jobs:
       - name: Verify Music Type taxonomy CLI parses
         run: npm run history:classify-music-types -- --help
 
+      - name: Verify archive reconciliation CLI parses
+        run: npm run history:reconcile -- --help
+
       - name: Validate sanitized history fixture
         run: |
           npm run history:validate -- \
