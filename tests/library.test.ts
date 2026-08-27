@@ -109,15 +109,14 @@ describe("Library cover wall query", () => {
     database.close();
   });
 
-  it("composes search, decade, listening-year, and repeat filters without widening membership", () => {
+  it("composes search, decade, and listening-year filters without widening membership", () => {
     const database = createDatabase();
 
     expect(runLibraryQuery(database, { decade: 1990 }).map((row) => row.canonical_album_id)).toEqual(["alb_a"]);
     expect(runLibraryQuery(database, { listeningYear: 2021 }).map((row) => row.canonical_album_id)).toEqual(["alb_b"]);
-    expect(runLibraryQuery(database, { repeatedOnly: true }).map((row) => row.canonical_album_id)).toEqual(["alb_a"]);
-    expect(runLibraryQuery(database, { search: "record", decade: 1990, listeningYear: 2024, repeatedOnly: true })
+    expect(runLibraryQuery(database, { search: "record", decade: 1990, listeningYear: 2024 })
       .map((row) => row.canonical_album_id)).toEqual(["alb_a"]);
-    expect(runLibraryQuery(database, { search: "Sparse", repeatedOnly: true })).toEqual([]);
+    expect(runLibraryQuery(database, { search: "Sparse" })).toEqual([]);
 
     database.close();
   });
@@ -141,8 +140,8 @@ describe("Library cover wall query", () => {
     expect(normalizeLibraryDecade("1995")).toBeNull();
     expect(normalizeLibraryListeningYear("2024")).toBe(2024);
     expect(normalizeLibraryListeningYear("twenty24")).toBeNull();
-    expect(normalizeLibraryQuery({ repeatedOnly: "1", sort: "recent", decade: "2000", listeningYear: "2021" }))
-      .toMatchObject({ repeatedOnly: true, sort: "recent", decade: 2000, listeningYear: 2021 });
+    expect(normalizeLibraryQuery({ sort: "recent", decade: "2000", listeningYear: "2021" }))
+      .toMatchObject({ sort: "recent", decade: 2000, listeningYear: 2021 });
   });
 
   it("maps runtime rows into the UI contract without leaking database field names", () => {
