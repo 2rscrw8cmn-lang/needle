@@ -117,12 +117,13 @@ function featuredStory(album: HomeAlbum): string {
   const first = yearFromTimestamp(album.firstMeaningfulListenAt);
   const last = yearFromTimestamp(album.lastMeaningfulListenAt);
   const years = album.distinctListeningYears;
-  const listens = album.qualifyingSessionCount;
+  const plays = album.fullPlayCount;
+  const playLabel = plays === 1 ? "Full Play" : "Full Plays";
 
   if (first && last && first !== last) {
-    return `First heard in ${first}, last heard in ${last}. This record appears across ${years} listening ${years === 1 ? "year" : "years"} with ${listens} qualifying ${listens === 1 ? "listen" : "listens"}.`;
+    return `First heard in ${first}, last heard in ${last}. This record appears across ${years} listening ${years === 1 ? "year" : "years"} with ${plays} ${playLabel}.`;
   }
-  return `This record has ${listens} qualifying ${listens === 1 ? "listen" : "listens"} across ${years} listening ${years === 1 ? "year" : "years"}.`;
+  return `This record has ${plays} ${playLabel} across ${years} listening ${years === 1 ? "year" : "years"}.`;
 }
 
 function formatMonthYear(value: string | null): string {
@@ -143,7 +144,7 @@ function HomeEmpty() {
     <main className={styles.homeState}>
       <p className="archive-label">No archive yet</p>
       <h1>A record of listening.</h1>
-      <p>Home will begin rediscovering records once qualifying album history is loaded.</p>
+      <p>Home will begin rediscovering records once meaningful album history is loaded.</p>
       <Link href="/library">Enter the Library</Link>
     </main>
   );
