@@ -98,6 +98,32 @@ data/history/music-type-overrides.json
 
 The classifier reads that file when present but never creates or overwrites it, so manual decisions survive reimports. Override targets use stable canonical album IDs.
 
+## 7. Reconcile the archive + build the D1 import
+
+After 1.04–1.06 have completed successfully:
+
+```bash
+npm run history:reconcile
+```
+
+1.07 collapses source-edition sessions onto canonical albums, derives first/last meaningful listens, Full/Near/Sparse/Review counts, distinct listening months/years, revisit evidence inputs, and the exact D-009 default Library membership rule.
+
+It also emits a privacy-minimized runtime archive and deterministic `archive-import.sql`. Runtime sessions do not contain raw playback rows, source event IDs, IP/device/country fields, or source file references.
+
+Apply migrations and load the local D1 database with:
+
+```bash
+npm run db:migrate:local
+npm run db:load-archive:local
+```
+
+Only load the remote D1 database after reviewing the real reconciliation report:
+
+```bash
+npm run db:migrate:remote
+npm run db:load-archive:remote
+```
+
 Generated outputs include:
 
 ```text
@@ -131,10 +157,15 @@ data/history/.needle/
 ├── album-music-type-classifications.json
 ├── genre-catalog.json
 ├── music-type-taxonomy-report.json
-└── music-type-taxonomy-report.md
+├── music-type-taxonomy-report.md
+├── listener-album-summaries.json
+├── runtime-archive.json
+├── archive-reconciliation-report.json
+├── archive-reconciliation-report.md
+└── archive-import.sql
 ```
 
-See `docs/SESSIONIZATION.md` for 1.03, `docs/CATALOG_RESOLUTION.md` for 1.04 identity, `docs/SPOTIFY_ENRICHMENT.md` for 1.05 enrichment, and `docs/MUSIC_TYPE_TAXONOMY.md` for the 1.06 taxonomy contract.
+See `docs/SESSIONIZATION.md` for 1.03, `docs/CATALOG_RESOLUTION.md` for 1.04 identity, `docs/SPOTIFY_ENRICHMENT.md` for 1.05 enrichment, `docs/MUSIC_TYPE_TAXONOMY.md` for 1.06 taxonomy, and `docs/ARCHIVE_RECONCILIATION.md` for the 1.07 Phase 1 runtime/D1 contract.
 
 ## Privacy
 
@@ -143,6 +174,8 @@ Everything in this folder is ignored by Git except this README.
 The raw Spotify export can contain IP addresses, device/platform information, timestamps, country, listening behavior, and Spotify identifiers. Do not commit those files, the personal analysis workbook, generated `.needle/` outputs, Spotify credentials, or personal Music Type override files.
 
 1.01 whitelists the private source fields needed for album-history reconstruction. Later stages consume only minimized/derived artifacts and public Spotify catalog metadata; they do not reintroduce discarded IP/device/country/offline/incognito fields.
+
+The D1 runtime import deliberately excludes raw playback events. `personal_album_state` is maintained separately from generated import data and is never deleted by `archive-import.sql`.
 
 ## Historical note
 
