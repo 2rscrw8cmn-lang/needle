@@ -187,8 +187,16 @@
   text-transform: uppercase;
 }
 
+.timelineNote {
+  max-width: 640px;
+  margin: var(--space-5) 0 0;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .timelineList {
-  margin: 0;
+  margin: var(--space-5) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -201,6 +209,10 @@
   grid-template-columns: minmax(130px, 0.28fr) minmax(180px, 0.4fr) minmax(0, 1fr);
   gap: var(--space-6);
   align-items: center;
+}
+
+.timelineRow:first-child {
+  border-top: var(--rule);
 }
 
 .timelineRow time {
