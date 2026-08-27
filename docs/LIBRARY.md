@@ -33,9 +33,11 @@ The Library query maps D1 rows into a product-facing album object containing:
 - first/last meaningful listen timestamps;
 - qualifying session count;
 - actual listening years;
-- repeat-qualifying-session state retained for later history/detail use.
+- repeat-qualifying-session state retained for later history use.
 
-The cover wall still displays only artwork, album title, and artist. History fields support collection controls and later Album detail without turning each tile into a statistics card.
+The cover wall still displays only artwork, album title, and artist. History fields support collection controls without turning each tile into a statistics card.
+
+Every visible Library tile links to `/album/:canonicalAlbumId`, where 2.06 expands the same canonical record into its archival detail view.
 
 ## URL state
 
@@ -123,14 +125,13 @@ There are no card backgrounds, permanent badges, stats, or controls around each 
 
 The existing Cloudflare `env.DB` binding is the runtime source of truth.
 
-## Deferred to later Library issues
+## Deferred to later Library/Album issues
 
-The current Library still defers:
+The current product still defers:
 
 - Music Type / Genre filters pending real enrichment coverage;
-- Album detail navigation/implementation;
 - Favorite/Revisit personal controls;
-- listening-history timeline;
-- Open in Spotify.
+- related-record modules;
+- richer Spotify/enrichment presentation beyond the outbound Album-detail destination.
 
 Those features should consume the same canonical IDs and D1 runtime contract rather than creating parallel collection data sources.
