@@ -14,7 +14,7 @@ No permanent admin-style sidebar is required.
 
 ## Route model
 
-The exact framework syntax is deferred, but the conceptual route structure is:
+The conceptual route structure is:
 
 ```text
 /
@@ -64,7 +64,7 @@ Expandable/secondary filter controls may include:
 - release decade/year;
 - listening year/period;
 - listening evidence/classification;
-- Favorite/Revisit once app state exists.
+- Favorite/Revisit once personal state is used as a collection filter.
 
 Filters should combine and remain visible enough that the user understands the current collection slice.
 
@@ -77,8 +77,6 @@ Filters should combine and remain visible enough that the user understands the c
 - release date;
 - most revisited;
 - most listening time.
-
-Final V1 set should be selected after data-query costs are known.
 
 ## Explore
 
@@ -121,7 +119,8 @@ Purpose: **understand the archive over time**.
 
 A listener should be able to choose a listening year and see:
 
-- qualifying albums from that period;
+- albums with meaningful Full/Near-Complete evidence from that period;
+- true **Full Play / Full Plays** separately from Near-Complete evidence;
 - prominent/repeated records;
 - new-to-history records vs revisits;
 - Music Type/Genre mix once enrichment is available;
@@ -145,11 +144,17 @@ Recommended hierarchy:
 
 1. large artwork;
 2. album / artist / release metadata;
-3. listening-history summary;
-4. session/evidence timeline;
-5. personal state (Favorite/Revisit/notes if enabled);
+3. explicit personal state — Favorite, Revisit, Review;
+4. listening-history summary;
+5. session/evidence timeline;
 6. related records from the listener's own archive;
 7. Open in Spotify.
+
+### Product terminology
+
+- **Full Play / Full Plays** means `evidence_status = 'full'` only.
+- Near-Complete sessions remain separate evidence.
+- The listener-authored text field is **Review / Reviews**, never Notes in product UI. The storage column may remain `personal_album_state.notes` as an implementation detail.
 
 ### Historical evidence display
 
@@ -157,8 +162,8 @@ The UI should translate technical classifications into understandable language w
 
 Examples:
 
-- “Listened front-to-back 4 times” when Full evidence supports it;
-- “Nearly complete listen” for Near-complete sessions;
+- “4 Full Plays” when Full evidence supports it;
+- “Nearly complete listen” for Near-Complete sessions;
 - “Appears in your history” for sparse evidence if surfaced;
 - catalog/edition uncertainty only when it affects trust or the Spotify destination.
 

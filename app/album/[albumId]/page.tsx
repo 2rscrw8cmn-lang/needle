@@ -12,8 +12,11 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+type SearchParamValue = string | string[] | undefined;
+
 interface AlbumPageProps {
   params: Promise<{ albumId: string }>;
+  searchParams: Promise<{ saved?: SearchParamValue }>;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -23,8 +26,9 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC",
 });
 
-export default async function AlbumPage({ params }: AlbumPageProps) {
-  const { albumId } = await params;
+export default async function AlbumPage({ params, searchParams }: AlbumPageProps) {
+  const [{ albumId }, query] = await Promise.all([params, searchParams]);
+  const saved = firstParam(query.saved) === "1";
 
   let album: AlbumDetail | null;
   try {
@@ -38,6 +42,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
   }
 
   const otherEvidenceCount = album.sparseSessionCount + album.reviewSessionCount;
+  const albumRouteId = encodeURIComponent(album.canonicalAlbumId);
 
   return (
     <main className={styles.albumPage}>
@@ -80,6 +85,56 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
         </div>
       </section>
 
+      <section className={styles.personalSection} aria-labelledby="personal-title">
+        <div className={styles.sectionHeading}>
+          <p className="archive-label">Your record</p>
+          <h2 id="personal-title">Personal state</h2>
+        </div>
+
+        <form
+          className={styles.personalForm}
+          action={`/album/${albumRouteId}/state`}
+          method="post"
+        >
+          <div className={styles.personalToggles}>
+            <label>
+              <input
+                name="favorite"
+                type="checkbox"
+                value="1"
+                defaultChecked={album.personalState.favorite}
+              />
+              <span>Favorite</span>
+            </label>
+            <label>
+              <input
+                name="revisit"
+                type="checkbox"
+                value="1"
+                defaultChecked={album.personalState.revisit}
+              />
+              <span>Revisit</span>
+            </label>
+          </div>
+
+          <label className={styles.reviewField}>
+            <span>Review</span>
+            <textarea
+              name="review"
+              maxLength={10000}
+              rows={6}
+              defaultValue={album.personalState.review}
+              placeholder="Write your review of this record…"
+            />
+          </label>
+
+          <div className={styles.personalActions}>
+            <button type="submit">Save</button>
+            {saved ? <span role="status">Saved</span> : null}
+          </div>
+        </form>
+      </section>
+
       <section className={styles.historySection} aria-labelledby="history-title">
         <div className={styles.sectionHeading}>
           <p className="archive-label">Your history with this record</p>
@@ -89,12 +144,14 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
         <dl className={styles.historySummary}>
           <SummaryItem label="First heard" value={formatDate(album.firstMeaningfulListenAt)} />
           <SummaryItem label="Last heard" value={formatDate(album.lastMeaningfulListenAt)} />
-          <SummaryItem label="Qualifying listens" value={album.qualifyingSessionCount.toLocaleString()} />
+          <SummaryItem
+            label={album.fullSessionCount === 1 ? "Full Play" : "Full Plays"}
+            value={album.fullSessionCount.toLocaleString()}
+          />
           <SummaryItem label="Listening years" value={formatYearSpan(album.listeningYears)} />
         </dl>
 
         <div className={styles.evidenceSummary}>
-          <EvidenceCount label="Front-to-back" count={album.fullSessionCount} />
           <EvidenceCount label="Nearly complete" count={album.nearCompleteSessionCount} />
           {album.sparseSessionCount > 0 ? <EvidenceCount label="Brief appearances" count={album.sparseSessionCount} /> : null}
           {album.reviewSessionCount > 0 ? <EvidenceCount label="Other evidence" count={album.reviewSessionCount} /> : null}
@@ -113,10 +170,10 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
         <div className={styles.timelineHeading}>
           <div>
             <p className="archive-label">Listening evidence</p>
-            <h2 id="timeline-title">Qualifying listens</h2>
+            <h2 id="timeline-title">Listening sessions</h2>
           </div>
           <p className={styles.timelineCount}>
-            {formatQualifyingCount(album.sessions.length, album.qualifyingSessionCount)}
+            {formatSessionCount(album.sessions.length, album.qualifyingSessionCount)}
           </p>
         </div>
 
@@ -127,7 +184,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
         ) : null}
 
         {album.sessions.length === 0 ? (
-          <p className={styles.noSessions}>No qualifying listening sessions are available for this record.</p>
+          <p className={styles.noSessions}>No Full or Near-Complete listening sessions are available for this record.</p>
         ) : (
           <ol className={styles.timelineList}>
             {album.sessions.map((session) => (
@@ -195,9 +252,9 @@ function formatYearSpan(years: number[]): string {
   return `${years[0]}–${years[years.length - 1]}`;
 }
 
-function formatQualifyingCount(visible: number, total: number): string {
+function formatSessionCount(visible: number, total: number): string {
   if (visible < total) return `Latest ${visible.toLocaleString()} of ${total.toLocaleString()}`;
-  return `${total.toLocaleString()} ${total === 1 ? "qualifying listen" : "qualifying listens"}`;
+  return `${total.toLocaleString()} ${total === 1 ? "session" : "sessions"}`;
 }
 
 function formatSessionContext(minutes: number, tracks: number): string {
@@ -205,4 +262,8 @@ function formatSessionContext(minutes: number, tracks: number): string {
   const minuteLabel = `${roundedMinutes} min`;
   if (tracks <= 0) return minuteLabel;
   return `${tracks} ${tracks === 1 ? "track" : "tracks"} · ${minuteLabel}`;
+}
+
+function firstParam(value: SearchParamValue): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }

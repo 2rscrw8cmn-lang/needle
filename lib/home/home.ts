@@ -6,6 +6,7 @@ SELECT
   a.artwork_url,
   s.first_meaningful_listen_at,
   s.last_meaningful_listen_at,
+  s.full_session_count,
   s.qualifying_session_count,
   s.distinct_listening_years
 FROM albums AS a
@@ -59,6 +60,7 @@ export interface HomeAlbumRow {
   artwork_url: string | null;
   first_meaningful_listen_at: string | null;
   last_meaningful_listen_at: string | null;
+  full_session_count: number;
   qualifying_session_count: number;
   distinct_listening_years: number;
 }
@@ -70,6 +72,7 @@ export interface HomeAlbum {
   artworkUrl: string | null;
   firstMeaningfulListenAt: string | null;
   lastMeaningfulListenAt: string | null;
+  fullPlayCount: number;
   qualifyingSessionCount: number;
   distinctListeningYears: number;
 }
@@ -110,6 +113,7 @@ export function mapHomeAlbumRow(row: HomeAlbumRow): HomeAlbum {
     artworkUrl: row.artwork_url,
     firstMeaningfulListenAt: row.first_meaningful_listen_at,
     lastMeaningfulListenAt: row.last_meaningful_listen_at,
+    fullPlayCount: Number(row.full_session_count),
     qualifyingSessionCount: Number(row.qualifying_session_count),
     distinctListeningYears: Number(row.distinct_listening_years),
   };

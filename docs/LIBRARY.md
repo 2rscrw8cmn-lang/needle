@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Needle's Library is the fast, artwork-first working collection. It reads the approved Phase 1 runtime schema from D1 and never reads raw Spotify export files or generated `.needle/` artifacts at runtime.
+Needle's Library is the fast, artwork-first working collection. It reads the approved runtime schema from D1 and never reads raw Spotify export files or generated `.needle/` artifacts at runtime.
 
 ## Membership query
 
@@ -16,9 +16,7 @@ albums.archive_member = 1
 listener_album_summaries.archive_member = 1
 ```
 
-This preserves D-009 at the product boundary: the default Library contains albums with qualifying Full or Near-Complete listening evidence.
-
-Sparse-only and unresolved review evidence may remain in importer/audit data but does not appear in the default cover wall, search results, filters, or sort views.
+This preserves D-009 at the product boundary: the default Library contains albums with at least one Full or Near-Complete listening session. Sparse-only and unresolved review evidence may remain in importer/audit data but does not appear in the default cover wall, search results, filters, or sort views.
 
 ## Current row contract
 
@@ -31,13 +29,22 @@ The Library query maps D1 rows into a product-facing album object containing:
 - provider artwork URL;
 - Music Type when available;
 - first/last meaningful listen timestamps;
-- qualifying session count;
-- actual listening years;
-- repeat-qualifying-session state retained for later history use.
+- internal combined Full/Near-Complete session count;
+- actual listening years.
 
-The cover wall still displays only artwork, album title, and artist. History fields support collection controls without turning each tile into a statistics card.
+The cover wall displays only artwork, album title, and artist. History fields support collection controls without turning each tile into a statistics card.
 
-Every visible Library tile links to `/album/:canonicalAlbumId`, where 2.06 expands the same canonical record into its archival detail view.
+Every visible Library tile links to `/album/:canonicalAlbumId`, where the same canonical record expands into Album detail.
+
+## Product terminology
+
+The internal combined Full/Near-Complete count remains useful for membership and the **Most revisited** sort. It is not presented as **Full Plays**.
+
+In visible product language:
+
+- **Full Play / Full Plays** means Full sessions only;
+- Near-Complete evidence remains separate;
+- listener-authored text is **Review / Reviews**, never Notes.
 
 ## URL state
 
@@ -62,7 +69,7 @@ Sort is a fixed whitelist, never arbitrary SQL:
 - `release` — release year, newest first, unknown dates last;
 - `recent` — most recently meaningfully listened first;
 - `first` — earliest first meaningful listen first;
-- `revisited` — qualifying-session count first, then listening-year span and recency.
+- `revisited` — combined Full/Near-Complete session count first, then listening-year span and recency.
 
 Every sort includes stable artist/title/canonical-ID tie breakers.
 
@@ -72,7 +79,7 @@ Every sort includes stable artist/title/canonical-ID tie breakers.
 
 Phase 1.03 only promotes a provisional album after it has at least two Full/Near-Complete qualifying sessions. Phase 1.07 defines `repeat_qualifying_sessions` as that same `qualifying_session_count >= 2` threshold. Therefore the binary repeat flag does not discriminate among the current canonical Library candidates and is not useful as a filter.
 
-The **Most revisited** sort remains useful because it ranks albums by the actual qualifying-session count, then by the number of listening years and recency. It is intentionally different from a binary repeat filter.
+The **Most revisited** sort remains useful because it ranks albums by the actual combined session count, then by the number of listening years and recency. It is intentionally different from the listener-owned **Revisit** state on Album detail.
 
 ### Release decade — `decade`
 
@@ -92,9 +99,17 @@ Search, decade, and listening-year filters compose in one D1 query. Search patte
 
 No filter can widen results outside current D-009 membership.
 
+## Personal state
+
+Favorite, Revisit, and Review are listener-owned fields stored in `personal_album_state` and edited on Album detail. They are outside generated archive-import ownership and survive reimports.
+
+The storage column for Review remains `personal_album_state.notes` as an implementation detail; product UI calls it **Review**.
+
+Library filtering by Favorite/Revisit may be added later if it proves useful, but those states already exist and persist.
+
 ## Music Type and Genre boundary
 
-Music Type and Genre controls are deliberately absent from 2.05. The cached local preview currently has no real 1.05/1.06 classification coverage. Those controls should appear only after real coverage is available and reviewed; the UI must not imply taxonomy evidence that does not exist.
+Music Type and Genre controls remain absent until real 1.05/1.06 classification coverage is available and reviewed. The UI must not imply taxonomy evidence that does not exist.
 
 ## Empty states
 
@@ -125,13 +140,13 @@ There are no card backgrounds, permanent badges, stats, or controls around each 
 
 The existing Cloudflare `env.DB` binding is the runtime source of truth.
 
-## Deferred to later Library/Album issues
+## Deferred
 
 The current product still defers:
 
 - Music Type / Genre filters pending real enrichment coverage;
-- Favorite/Revisit personal controls;
 - related-record modules;
-- richer Spotify/enrichment presentation beyond the outbound Album-detail destination.
+- richer Spotify/enrichment presentation beyond the outbound Album-detail destination;
+- final visual-polish pass.
 
 Those features should consume the same canonical IDs and D1 runtime contract rather than creating parallel collection data sources.

@@ -20,8 +20,10 @@ SELECT
   a.artwork_url,
   s.first_meaningful_listen_at,
   s.last_meaningful_listen_at,
-  s.qualifying_session_count,
-  COUNT(session.session_id) AS year_qualifying_session_count,
+  s.full_session_count,
+  COUNT(session.session_id) AS year_meaningful_session_count,
+  SUM(CASE WHEN session.evidence_status = 'full' THEN 1 ELSE 0 END) AS year_full_play_count,
+  SUM(CASE WHEN session.evidence_status = 'near_complete' THEN 1 ELSE 0 END) AS year_near_complete_count,
   CASE
     WHEN substr(s.first_meaningful_listen_at, 1, 4) = ? THEN 1
     ELSE 0
@@ -46,9 +48,10 @@ GROUP BY
   a.artwork_url,
   s.first_meaningful_listen_at,
   s.last_meaningful_listen_at,
-  s.qualifying_session_count
+  s.full_session_count
 ORDER BY
-  year_qualifying_session_count DESC,
+  year_meaningful_session_count DESC,
+  year_full_play_count DESC,
   a.primary_artist_name COLLATE NOCASE ASC,
   a.title COLLATE NOCASE ASC,
   a.canonical_album_id ASC
@@ -81,8 +84,10 @@ export interface HistoryAlbumRow {
   artwork_url: string | null;
   first_meaningful_listen_at: string | null;
   last_meaningful_listen_at: string | null;
-  qualifying_session_count: number;
-  year_qualifying_session_count: number;
+  full_session_count: number;
+  year_meaningful_session_count: number;
+  year_full_play_count: number;
+  year_near_complete_count: number;
   first_heard_in_year: number;
 }
 
@@ -95,8 +100,10 @@ export interface HistoryAlbum {
   artworkUrl: string | null;
   firstMeaningfulListenAt: string | null;
   lastMeaningfulListenAt: string | null;
-  lifetimeQualifyingSessionCount: number;
-  yearQualifyingSessionCount: number;
+  lifetimeFullPlayCount: number;
+  yearMeaningfulSessionCount: number;
+  yearFullPlayCount: number;
+  yearNearCompleteCount: number;
   firstHeardInYear: boolean;
 }
 
@@ -107,7 +114,7 @@ export interface HistoryYearView {
     albums: number;
     firstHeard: number;
     revisited: number;
-    qualifyingListens: number;
+    fullPlays: number;
   };
 }
 
@@ -137,7 +144,7 @@ export async function loadHistoryYear(database: HistoryDatabase, year: number): 
       albums: albums.length,
       firstHeard: albums.filter((album) => album.firstHeardInYear).length,
       revisited: albums.filter((album) => !album.firstHeardInYear).length,
-      qualifyingListens: albums.reduce((sum, album) => sum + album.yearQualifyingSessionCount, 0),
+      fullPlays: albums.reduce((sum, album) => sum + album.yearFullPlayCount, 0),
     },
   };
 }
@@ -165,8 +172,10 @@ export function mapHistoryAlbumRow(row: HistoryAlbumRow): HistoryAlbum {
     artworkUrl: row.artwork_url,
     firstMeaningfulListenAt: row.first_meaningful_listen_at,
     lastMeaningfulListenAt: row.last_meaningful_listen_at,
-    lifetimeQualifyingSessionCount: Number(row.qualifying_session_count),
-    yearQualifyingSessionCount: Number(row.year_qualifying_session_count),
+    lifetimeFullPlayCount: Number(row.full_session_count),
+    yearMeaningfulSessionCount: Number(row.year_meaningful_session_count),
+    yearFullPlayCount: Number(row.year_full_play_count),
+    yearNearCompleteCount: Number(row.year_near_complete_count),
     firstHeardInYear: Number(row.first_heard_in_year) === 1,
   };
 }
@@ -175,7 +184,7 @@ function emptyHistoryYear(year: number): HistoryYearView {
   return {
     year,
     albums: [],
-    totals: { albums: 0, firstHeard: 0, revisited: 0, qualifyingListens: 0 },
+    totals: { albums: 0, firstHeard: 0, revisited: 0, fullPlays: 0 },
   };
 }
 

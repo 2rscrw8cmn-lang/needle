@@ -72,21 +72,23 @@ describe("History", () => {
     database.close();
   });
 
-  it("returns qualifying year evidence and excludes sparse sessions", () => {
+  it("separates Full Plays from Near-Complete year evidence", () => {
     const database = createDatabase();
     const rows = database
       .prepare(HISTORY_YEAR_SQL)
       .all("2024", "2024-01-01T00:00:00.000Z", "2025-01-01T00:00:00.000Z") as unknown as HistoryAlbumRow[];
 
     expect(rows.map((row) => row.canonical_album_id)).toEqual(["alb_a", "alb_b"]);
-    expect(Number(rows[0].year_qualifying_session_count)).toBe(2);
-    expect(Number(rows[1].year_qualifying_session_count)).toBe(1);
+    expect(Number(rows[0].year_meaningful_session_count)).toBe(2);
+    expect(Number(rows[0].year_full_play_count)).toBe(1);
+    expect(Number(rows[0].year_near_complete_count)).toBe(1);
+    expect(Number(rows[1].year_full_play_count)).toBe(1);
     expect(Number(rows[0].first_heard_in_year)).toBe(0);
     expect(Number(rows[1].first_heard_in_year)).toBe(1);
     database.close();
   });
 
-  it("maps year rows into product-facing history", () => {
+  it("maps year rows into product-facing Full Play history", () => {
     const album = mapHistoryAlbumRow({
       canonical_album_id: "alb_a",
       title: "Alpha Record",
@@ -95,16 +97,20 @@ describe("History", () => {
       artwork_url: null,
       first_meaningful_listen_at: "2020-03-01T00:00:00.000Z",
       last_meaningful_listen_at: "2024-06-01T00:00:00.000Z",
-      qualifying_session_count: 3,
-      year_qualifying_session_count: 2,
+      full_session_count: 2,
+      year_meaningful_session_count: 2,
+      year_full_play_count: 1,
+      year_near_complete_count: 1,
       first_heard_in_year: 0,
     });
 
     expect(album).toMatchObject({
       canonicalAlbumId: "alb_a",
       releaseYear: 1999,
-      lifetimeQualifyingSessionCount: 3,
-      yearQualifyingSessionCount: 2,
+      lifetimeFullPlayCount: 2,
+      yearMeaningfulSessionCount: 2,
+      yearFullPlayCount: 1,
+      yearNearCompleteCount: 1,
       firstHeardInYear: false,
     });
   });
