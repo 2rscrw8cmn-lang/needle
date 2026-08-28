@@ -3,9 +3,11 @@ import { Archivo, Bodoni_Moda, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { GlobalSearch } from "./components/global-search";
 import { SiteNav } from "./components/site-nav";
 import "./globals.css";
 import "./home-global.css";
+import "./global-search.css";
 
 const bodoni = Bodoni_Moda({
   subsets: ["latin"],
@@ -50,13 +52,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
               Needle
             </Link>
             <SiteNav />
-            <Link className="archive-search" href="/library#library-search" aria-label="Search the archive">
-              <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" focusable="false">
-                <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                <path d="m16 16 4 4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
-              </svg>
-              <span>Search the archive</span>
-            </Link>
+            <GlobalSearch />
           </header>
           <div id="main-content" className="site-content">
             {children}
