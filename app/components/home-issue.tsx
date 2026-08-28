@@ -17,51 +17,62 @@ interface HomeIssueProps {
 type LeadTemplate = "A" | "B" | "C";
 
 interface IssueDefinition {
+  number: number;
+  date: string;
   template: LeadTemplate;
   eyebrow: string;
   headline: string;
+  slugline: string;
   rule: string;
   body: string;
+  shelfTitle: string;
+  shelfNote: string;
+  shelfAlbums: HomeAlbum[];
   moduleTitle: string;
   moduleNote: string;
   leadAlbums: HomeAlbum[];
 }
 
 export function HomeIssue({ home, initialIssueIndex, issueNumber, issueDate }: HomeIssueProps) {
-  const issues = useMemo(() => buildIssues(home), [home]);
+  const issues = useMemo(
+    () => buildIssues(home, issueNumber, issueDate, initialIssueIndex),
+    [home, issueNumber, issueDate, initialIssueIndex],
+  );
   const [issueIndex, setIssueIndex] = useState(initialIssueIndex % issues.length);
   const [selectedYear, setSelectedYear] = useState<number | null>(home.history.at(-1)?.year ?? null);
   const issue = issues[issueIndex];
   const rotatingAlbums = rotateAlbums(home.rotating, issueIndex * 4, 4);
 
-  function turnIssue(direction: -1 | 1) {
-    setIssueIndex((current) => (current + direction + issues.length) % issues.length);
-  }
-
   return (
     <main className={`${styles.homePage} home-shell`}>
-      <section className={styles.issueBar} aria-label="Current Needle issue">
-        <p className={styles.issueMeta}>Issue N° {String(issueNumber).padStart(2, "0")} · {issueDate}</p>
-        <p className={styles.issueRule}>{issue.rule}</p>
-        <div className={styles.issueTurner}>
-          <span>Turn the issue</span>
-          <button type="button" onClick={() => turnIssue(-1)} aria-label="Previous issue">‹</button>
-          <button type="button" onClick={() => turnIssue(1)} aria-label="Next issue">›</button>
-        </div>
+      <section className={styles.issueIndex} aria-label="Needle issue index">
+        {issues.map((entry, index) => (
+          <button
+            type="button"
+            className={styles.issueIndexItem}
+            data-selected={index === issueIndex ? "true" : "false"}
+            aria-pressed={index === issueIndex}
+            onClick={() => setIssueIndex(index)}
+            key={`${entry.number}-${entry.slugline}`}
+          >
+            <span>Issue N° {String(entry.number).padStart(2, "0")} · {entry.date}</span>
+            <strong>{entry.slugline}</strong>
+          </button>
+        ))}
       </section>
 
       <section className={styles.leadSection} aria-labelledby="home-lead-title">
         <MarginNote
           numeral="I"
           lines={[
+            `Issue N° ${String(issue.number).padStart(2, "0")}`,
+            issue.date,
             `${home.archive.archiveCount.toLocaleString()} records`,
             archiveRange(home),
-            `Compiled ${issueDate}`,
           ]}
           note={issue.rule}
         />
         <div className={styles.leadBody}>
-          <p className={styles.mobileMarginNote}>{issue.rule}</p>
           {issue.template === "A" ? <LeadA issue={issue} /> : null}
           {issue.template === "B" ? <LeadB issue={issue} /> : null}
           {issue.template === "C" ? <LeadC issue={issue} /> : null}
@@ -71,20 +82,20 @@ export function HomeIssue({ home, initialIssueIndex, issueNumber, issueDate }: H
       <section className={styles.sectionGrid} aria-labelledby="home-shelf-title">
         <MarginNote
           numeral="II"
-          lines={[`${home.archive.archiveCount.toLocaleString()} archive entries`]}
-          note="A chronological shelf from the current archive."
+          lines={[`Issue N° ${String(issue.number).padStart(2, "0")}`]}
+          note={issue.shelfNote}
         />
         <div className={styles.sectionBody}>
-          <p className={styles.mobileMarginNote}>A chronological shelf from the current archive.</p>
+          <p className={styles.mobileMarginNote}>{issue.shelfNote}</p>
           <div className={styles.sectionHeader}>
             <div>
-              <p className={styles.eyebrow}>Section II · Shelf</p>
-              <h2 id="home-shelf-title">The archive, in order.</h2>
+              <p className={styles.eyebrow}>Section II · Issue shelf</p>
+              <h2 id="home-shelf-title">{issue.shelfTitle}</h2>
             </div>
-            <Link href="/library">View all ({home.archive.archiveCount.toLocaleString()}) →</Link>
+            <Link href="/library">Open library →</Link>
           </div>
           <div className={styles.shelfScroller}>
-            {home.shelf.map((album, index) => (
+            {issue.shelfAlbums.map((album, index) => (
               <Link
                 className={styles.shelfItem}
                 href={`/album/${encodeURIComponent(album.canonicalAlbumId)}`}
@@ -96,7 +107,7 @@ export function HomeIssue({ home, initialIssueIndex, issueNumber, issueDate }: H
                   artistName={album.artistName}
                   scale="shelf"
                 />
-                <span>{catalogRef(index)}</span>
+                <span>{catalogRef(issueIndex * 100 + index)}</span>
               </Link>
             ))}
           </div>
@@ -351,43 +362,89 @@ function HistoryChart({
   );
 }
 
-function buildIssues(home: HomeView): IssueDefinition[] {
+function buildIssues(
+  home: HomeView,
+  currentIssueNumber: number,
+  currentIssueDate: string,
+  currentIssueIndex: number,
+): IssueDefinition[] {
   const featured = home.featured;
   const recent = home.recentlyRevisited;
   const stale = home.worthAnotherListen;
+  const shared = [featured, ...recent, ...home.rotating].filter((album): album is HomeAlbum => Boolean(album));
+  const issueMeta = [0, 1, 2].map((index) => buildIssueMeta(currentIssueNumber, currentIssueDate, index - currentIssueIndex));
 
   return [
     {
+      ...issueMeta[0],
       template: "A",
       eyebrow: "A record across time",
       headline: "Still in the archive.",
+      slugline: "Still in the archive",
       rule: "The record with the longest reach across your listening history.",
       body: featured ? storyFor(featured) : "A record supported by the longest span of listening evidence in the current archive.",
+      shelfTitle: "Records carried across time.",
+      shelfNote: "A shelf built around records that keep returning across the archive.",
+      shelfAlbums: uniqueAlbums(shared).slice(0, 12),
       moduleTitle: "Most carried forward",
       moduleNote: "Records ordered by Full Plays, then by the number of listening years they span.",
       leadAlbums: [featured, ...recent].filter((album): album is HomeAlbum => Boolean(album)).slice(0, 3),
     },
     {
+      ...issueMeta[1],
       template: "B",
       eyebrow: "Back in rotation",
       headline: "Returned to, recently.",
+      slugline: "Recent returns",
       rule: "Records heard again most recently after appearing in more than one listening year.",
       body: recent[0] ? storyFor(recent[0]) : "A recent return supported by listening evidence across more than one year.",
+      shelfTitle: "Back in rotation.",
+      shelfNote: "The records that have reappeared most recently after crossing more than one listening year.",
+      shelfAlbums: uniqueAlbums([...recent, ...home.rotating]).slice(0, 12),
       moduleTitle: "Recent returns",
       moduleNote: "A deterministic view of records that have crossed more than one listening year.",
       leadAlbums: [recent[0] ?? featured, recent[1], recent[2]].filter((album): album is HomeAlbum => Boolean(album)),
     },
     {
+      ...issueMeta[2],
       template: "C",
       eyebrow: "From deeper in the archive",
       headline: "Further back on the shelf.",
+      slugline: "Deep archive",
       rule: "Records ordered from the oldest last-heard evidence in the current archive.",
       body: stale[0] ? storyFor(stale[0]) : "A record surfaced from the oldest last-heard evidence still represented in the archive.",
+      shelfTitle: "Not heard in a while.",
+      shelfNote: "A shelf pulled from the oldest last-heard evidence still represented in the archive.",
+      shelfAlbums: uniqueAlbums([...stale, ...home.shelf]).slice(0, 12),
       moduleTitle: "Deep archive",
       moduleNote: "A quieter pass through records whose last meaningful listen sits further back in time.",
       leadAlbums: [stale[0] ?? featured, stale[1], stale[2]].filter((album): album is HomeAlbum => Boolean(album)),
     },
   ];
+}
+
+function buildIssueMeta(currentNumber: number, currentDate: string, dayOffset: number) {
+  const parsed = new Date(`${currentDate} 12:00:00 UTC`);
+  const date = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+  date.setUTCDate(date.getUTCDate() + dayOffset);
+  return {
+    number: Math.max(1, currentNumber + dayOffset),
+    date: new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+      timeZone: "UTC",
+    }).format(date),
+  };
+}
+
+function uniqueAlbums(albums: HomeAlbum[]): HomeAlbum[] {
+  const seen = new Set<string>();
+  return albums.filter((album) => {
+    if (seen.has(album.canonicalAlbumId)) return false;
+    seen.add(album.canonicalAlbumId);
+    return true;
+  });
 }
 
 function rotateAlbums(albums: HomeAlbum[], offset: number, count: number): HomeAlbum[] {
