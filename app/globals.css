@@ -164,6 +164,13 @@ main {
   align-items: center;
   justify-content: center;
   gap: 34px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+}
+
+.site-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .site-nav__link {
@@ -469,6 +476,8 @@ a:focus-visible > .album-artwork {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0;
     border-top: 1px solid var(--rule-soft);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
   }
 
   .site-nav__link {
