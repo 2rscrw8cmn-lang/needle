@@ -23,9 +23,10 @@ describe("responsive structural contract", () => {
   });
 
   it("keeps Library usable at narrow phone widths", () => {
-    expect(library).toContain("@media (max-width: 480px)");
-    expect(library).toContain(".libraryFilterBar");
-    expect(library).toContain("grid-template-columns: 1fr");
+    expect(library).toContain("@media (max-width: 720px)");
+    expect(library).toContain(".libraryControls");
+    expect(library).toContain("grid-template-columns: repeat(2, minmax(0, 1fr))");
+    expect(library).toContain(".libraryGrid");
     expect(library).toContain("min-height: 44px");
   });
 
