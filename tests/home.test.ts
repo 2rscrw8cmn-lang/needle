@@ -79,7 +79,8 @@ describe("Home rediscovery", () => {
     expect(resolveHomeIssueIndex(date)).toBe(resolveHomeIssueIndex(new Date("2026-08-28T00:00:01.000Z")));
     expect(resolveHomeIssueIndex(date)).toBeGreaterThanOrEqual(0);
     expect(resolveHomeIssueIndex(date)).toBeLessThan(3);
-    expect(homeIssueNumber(date)).toBe(1);
-    expect(homeIssueNumber(new Date("2026-08-29T12:00:00.000Z"))).toBe(2);
+    expect(resolveHomeIssueIndex(date)).toBe(1);
+    expect(homeIssueNumber(date)).toBe(215);
+    expect(homeIssueNumber(new Date("2026-08-29T12:00:00.000Z"))).toBe(216);
   });
 });

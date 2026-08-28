@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type KeyboardEvent } from "react";
+import {
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 
 import type { HomeAlbum, HomeHistoryYear, HomeView } from "../../lib/home/home";
 import { AlbumArtwork } from "./album-artwork";
@@ -14,24 +22,41 @@ interface HomeIssueProps {
   issueDate: string;
 }
 
-type LeadTemplate = "A" | "B" | "C";
+type LeadLayoutId = "archive-ledger" | "feature-satellites" | "gallery-lead";
+
+interface IssueLead {
+  eyebrow: string;
+  headline: string;
+  rule: string;
+  body: string;
+  albums: HomeAlbum[];
+}
+
+interface IssueSection {
+  title: string;
+  note: string;
+  albums: HomeAlbum[];
+}
 
 interface IssueDefinition {
   number: number;
   date: string;
-  template: LeadTemplate;
-  eyebrow: string;
-  headline: string;
+  layoutId: LeadLayoutId;
   slugline: string;
-  rule: string;
-  body: string;
-  shelfTitle: string;
-  shelfNote: string;
-  shelfAlbums: HomeAlbum[];
-  moduleTitle: string;
-  moduleNote: string;
-  leadAlbums: HomeAlbum[];
+  lead: IssueLead;
+  sectionTwo: IssueSection;
+  sectionThree: IssueSection;
 }
+
+interface LeadLayoutProps {
+  issue: IssueDefinition;
+}
+
+const LEAD_LAYOUTS = {
+  "archive-ledger": ArchiveLedgerLead,
+  "feature-satellites": FeatureSatellitesLead,
+  "gallery-lead": GalleryLead,
+} satisfies Record<LeadLayoutId, (props: LeadLayoutProps) => ReactNode>;
 
 export function HomeIssue({ home, initialIssueIndex, issueNumber, issueDate }: HomeIssueProps) {
   const issues = useMemo(
@@ -41,7 +66,6 @@ export function HomeIssue({ home, initialIssueIndex, issueNumber, issueDate }: H
   const [issueIndex, setIssueIndex] = useState(initialIssueIndex % issues.length);
   const [selectedYear, setSelectedYear] = useState<number | null>(home.history.at(-1)?.year ?? null);
   const issue = issues[issueIndex];
-  const rotatingAlbums = rotateAlbums(home.rotating, issueIndex * 4, 4);
 
   return (
     <main className={`${styles.homePage} home-shell`}>
@@ -55,7 +79,10 @@ export function HomeIssue({ home, initialIssueIndex, issueNumber, issueDate }: H
             onClick={() => setIssueIndex(index)}
             key={`${entry.number}-${entry.slugline}`}
           >
-            <span>Issue N° {String(entry.number).padStart(2, "0")} · {entry.date}</span>
+            <span className={styles.issueIndexMeta}>
+              <span>Issue N° {String(entry.number).padStart(3, "0")}</span>
+              <span>{entry.date}</span>
+            </span>
             <strong>{entry.slugline}</strong>
           </button>
         ))}
@@ -65,37 +92,35 @@ export function HomeIssue({ home, initialIssueIndex, issueNumber, issueDate }: H
         <MarginNote
           numeral="I"
           lines={[
-            `Issue N° ${String(issue.number).padStart(2, "0")}`,
+            `Issue N° ${String(issue.number).padStart(3, "0")}`,
             issue.date,
             `${home.archive.archiveCount.toLocaleString()} records`,
             archiveRange(home),
           ]}
-          note={issue.rule}
+          note={issue.lead.rule}
         />
         <div className={styles.leadBody}>
-          {issue.template === "A" ? <LeadA issue={issue} /> : null}
-          {issue.template === "B" ? <LeadB issue={issue} /> : null}
-          {issue.template === "C" ? <LeadC issue={issue} /> : null}
+          <IssueLeadFrame issue={issue} key={issue.number} />
         </div>
       </section>
 
       <section className={styles.sectionGrid} aria-labelledby="home-shelf-title">
         <MarginNote
           numeral="II"
-          lines={[`Issue N° ${String(issue.number).padStart(2, "0")}`]}
-          note={issue.shelfNote}
+          lines={[`Issue N° ${String(issue.number).padStart(3, "0")}`]}
+          note={issue.sectionTwo.note}
         />
         <div className={styles.sectionBody}>
-          <p className={styles.mobileMarginNote}>{issue.shelfNote}</p>
+          <p className={styles.mobileMarginNote}>{issue.sectionTwo.note}</p>
           <div className={styles.sectionHeader}>
             <div>
               <p className={styles.eyebrow}>Section II · Issue shelf</p>
-              <h2 id="home-shelf-title">{issue.shelfTitle}</h2>
+              <h2 id="home-shelf-title">{issue.sectionTwo.title}</h2>
             </div>
             <Link href="/library">Open library →</Link>
           </div>
-          <div className={styles.shelfScroller}>
-            {issue.shelfAlbums.map((album, index) => (
+          <DragShelf key={issue.number}>
+            {issue.sectionTwo.albums.map((album, index) => (
               <Link
                 className={styles.shelfItem}
                 href={`/album/${encodeURIComponent(album.canonicalAlbumId)}`}
@@ -110,22 +135,22 @@ export function HomeIssue({ home, initialIssueIndex, issueNumber, issueDate }: H
                 <span>{catalogRef(issueIndex * 100 + index)}</span>
               </Link>
             ))}
-          </div>
+          </DragShelf>
         </div>
       </section>
 
       <section className={styles.sectionGrid} aria-labelledby="home-module-title">
-        <MarginNote numeral="III" lines={[issue.moduleTitle]} note={issue.moduleNote} />
+        <MarginNote numeral="III" lines={[issue.sectionThree.title]} note={issue.sectionThree.note} />
         <div className={styles.sectionBody}>
-          <p className={styles.mobileMarginNote}>{issue.moduleNote}</p>
+          <p className={styles.mobileMarginNote}>{issue.sectionThree.note}</p>
           <div className={styles.sectionHeader}>
             <div>
               <p className={styles.eyebrow}>Section III · Archive view</p>
-              <h2 id="home-module-title">{issue.moduleTitle}</h2>
+              <h2 id="home-module-title">{issue.sectionThree.title}</h2>
             </div>
           </div>
           <div className={styles.moduleGrid}>
-            {rotatingAlbums.map((album, index) => (
+            {issue.sectionThree.albums.map((album, index) => (
               <Link
                 className={styles.moduleItem}
                 href={`/album/${encodeURIComponent(album.canonicalAlbumId)}`}
@@ -183,65 +208,132 @@ function MarginNote({ numeral, lines, note }: { numeral: string; lines: string[]
   );
 }
 
-function LeadA({ issue }: { issue: IssueDefinition }) {
-  const hero = issue.leadAlbums[0];
+function IssueLeadFrame({ issue }: LeadLayoutProps) {
+  const Layout = LEAD_LAYOUTS[issue.layoutId];
+  return (
+    <div className={styles.issueLeadFrame} data-layout={issue.layoutId}>
+      <Layout issue={issue} />
+    </div>
+  );
+}
+
+function ArchiveLedgerLead({ issue }: LeadLayoutProps) {
+  const hero = issue.lead.albums[0];
   if (!hero) return null;
   return (
-    <div className={`${styles.lead} ${styles.leadA}`}>
-      <LeadCopy issue={issue} hero={hero} />
+    <div className={`${styles.leadLayout} ${styles.archiveLedger}`}>
+      <LeadCopy lead={issue.lead} hero={hero} />
       <MetaRail album={hero} />
       <HeroAlbum album={hero} />
     </div>
   );
 }
 
-function LeadB({ issue }: { issue: IssueDefinition }) {
-  const [hero, second, third] = issue.leadAlbums;
+function FeatureSatellitesLead({ issue }: LeadLayoutProps) {
+  const [hero, second, third] = issue.lead.albums;
   if (!hero) return null;
   return (
-    <div className={`${styles.lead} ${styles.leadB}`}>
-      <LeadCopy issue={issue} hero={hero} />
-      <div className={styles.leadBArtwork}>
+    <div className={`${styles.leadLayout} ${styles.featureSatellites}`}>
+      <LeadCopy lead={issue.lead} hero={hero} />
+      <div className={styles.featureArtwork}>
         <HeroAlbum album={hero} />
-        <div className={styles.leadPair}>
+        <div className={styles.satelliteAlbums} aria-label="Supporting records">
           {second ? <CompactAlbum album={second} /> : null}
           {third ? <CompactAlbum album={third} /> : null}
         </div>
-        <MetaRail album={hero} horizontal />
+        <MetaRail album={hero} />
       </div>
     </div>
   );
 }
 
-function LeadC({ issue }: { issue: IssueDefinition }) {
-  const [hero, second, third] = issue.leadAlbums;
+function GalleryLead({ issue }: LeadLayoutProps) {
+  const [hero, second, third] = issue.lead.albums;
   if (!hero) return null;
-  const albums = [hero, second, third].filter((album): album is HomeAlbum => Boolean(album));
   return (
-    <div className={`${styles.lead} ${styles.leadC}`}>
-      <div className={styles.leadCIntro}>
-        <p className={styles.eyebrow}>{issue.eyebrow}</p>
-        <h1 id="home-lead-title">{issue.headline}</h1>
-        <div className={styles.leadCBody}>
-          <p>{issue.body}</p>
-          <Link className={styles.leadCta} href={`/album/${encodeURIComponent(hero.canonicalAlbumId)}`}>Open lead record <span>→</span></Link>
-        </div>
-      </div>
-      <div className={styles.leadTrio}>
-        {albums.map((album) => <CompactAlbum album={album} key={album.canonicalAlbumId} />)}
+    <div className={`${styles.leadLayout} ${styles.galleryLead}`}>
+      <LeadCopy lead={issue.lead} hero={hero} />
+      <div className={styles.galleryAlbums} aria-label="Lead records">
+        <HeroAlbum album={hero} />
+        {second ? <CompactAlbum album={second} /> : null}
+        {third ? <CompactAlbum album={third} /> : null}
       </div>
     </div>
   );
 }
 
-function LeadCopy({ issue, hero }: { issue: IssueDefinition; hero: HomeAlbum }) {
+function LeadCopy({ lead, hero }: { lead: IssueLead; hero: HomeAlbum }) {
   return (
     <div className={styles.leadCopy}>
-      <p className={styles.eyebrow}>{issue.eyebrow}</p>
-      <h1 id="home-lead-title">{issue.headline}</h1>
+      <p className={styles.eyebrow}>{lead.eyebrow}</p>
+      <h1 id="home-lead-title">{lead.headline}</h1>
       <div className={styles.leadRule} />
-      <p className={styles.leadText}>{issue.body}</p>
+      <p className={styles.leadText}>{lead.body}</p>
       <Link className={styles.leadCta} href={`/album/${encodeURIComponent(hero.canonicalAlbumId)}`}>Open lead record <span>→</span></Link>
+    </div>
+  );
+}
+
+function DragShelf({ children }: { children: ReactNode }) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef({ active: false, moved: false, startX: 0, startScrollLeft: 0 });
+  const [dragging, setDragging] = useState(false);
+
+  function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== "mouse" || event.button !== 0) return;
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    dragRef.current = {
+      active: true,
+      moved: false,
+      startX: event.clientX,
+      startScrollLeft: scroller.scrollLeft,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (!dragRef.current.active || !scrollerRef.current) return;
+    const distance = event.clientX - dragRef.current.startX;
+    if (!dragRef.current.moved && Math.abs(distance) > 7) {
+      dragRef.current.moved = true;
+      setDragging(true);
+    }
+    if (!dragRef.current.moved) return;
+    event.preventDefault();
+    scrollerRef.current.scrollLeft = dragRef.current.startScrollLeft - distance;
+  }
+
+  function endDrag(event: PointerEvent<HTMLDivElement>) {
+    if (!dragRef.current.active) return;
+    dragRef.current.active = false;
+    setDragging(false);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  }
+
+  function protectDraggedLink(event: MouseEvent<HTMLDivElement>) {
+    if (!dragRef.current.moved) return;
+    event.preventDefault();
+    event.stopPropagation();
+    dragRef.current.moved = false;
+  }
+
+  return (
+    <div
+      ref={scrollerRef}
+      className={styles.shelfScroller}
+      data-dragging={dragging ? "true" : "false"}
+      aria-label="Issue shelf albums"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onClickCapture={protectDraggedLink}
+      onDragStart={(event) => event.preventDefault()}
+    >
+      {children}
     </div>
   );
 }
@@ -277,16 +369,14 @@ function CompactAlbum({ album }: { album: HomeAlbum }) {
   );
 }
 
-function MetaRail({ album, horizontal = false }: { album: HomeAlbum; horizontal?: boolean }) {
+function MetaRail({ album }: { album: HomeAlbum }) {
   const entries = [
     ["First heard", yearFromTimestamp(album.firstMeaningfulListenAt) ?? "—"],
     ["Last heard", yearFromTimestamp(album.lastMeaningfulListenAt) ?? "—"],
     ["Full plays", album.fullPlayCount],
-    ["Listening years", album.distinctListeningYears],
-    ["Qualifying listens", album.qualifyingSessionCount],
   ];
   return (
-    <dl className={`${styles.metaRail} ${horizontal ? styles.metaRailHorizontal : ""}`}>
+    <dl className={styles.metaRail}>
       {entries.map(([label, value]) => (
         <div key={label}>
           <dd>{value}</dd>
@@ -377,48 +467,69 @@ function buildIssues(
   return [
     {
       ...issueMeta[0],
-      template: "A",
-      eyebrow: "A record across time",
-      headline: "Still in the archive.",
+      layoutId: "archive-ledger",
       slugline: "Still in the archive",
-      rule: "The record with the longest reach across your listening history.",
-      body: featured ? storyFor(featured) : "A record supported by the longest span of listening evidence in the current archive.",
-      shelfTitle: "Records carried across time.",
-      shelfNote: "A shelf built around records that keep returning across the archive.",
-      shelfAlbums: uniqueAlbums(shared).slice(0, 12),
-      moduleTitle: "Most carried forward",
-      moduleNote: "Records ordered by Full Plays, then by the number of listening years they span.",
-      leadAlbums: [featured, ...recent].filter((album): album is HomeAlbum => Boolean(album)).slice(0, 3),
+      lead: {
+        eyebrow: "A record across time",
+        headline: "Still in the archive.",
+        rule: "The record with the longest reach across your listening history.",
+        body: featured ? storyFor(featured) : "A record supported by the longest span of listening evidence in the current archive.",
+        albums: [featured, ...recent].filter((album): album is HomeAlbum => Boolean(album)).slice(0, 3),
+      },
+      sectionTwo: {
+        title: "Records carried across time.",
+        note: "A shelf built around records that keep returning across the archive.",
+        albums: uniqueAlbums(shared).slice(0, 12),
+      },
+      sectionThree: {
+        title: "Most carried forward",
+        note: "Records ordered by Full Plays, then by the number of listening years they span.",
+        albums: rotateAlbums(uniqueAlbums(shared), 0, 4),
+      },
     },
     {
       ...issueMeta[1],
-      template: "B",
-      eyebrow: "Back in rotation",
-      headline: "Returned to, recently.",
+      layoutId: "feature-satellites",
       slugline: "Recent returns",
-      rule: "Records heard again most recently after appearing in more than one listening year.",
-      body: recent[0] ? storyFor(recent[0]) : "A recent return supported by listening evidence across more than one year.",
-      shelfTitle: "Back in rotation.",
-      shelfNote: "The records that have reappeared most recently after crossing more than one listening year.",
-      shelfAlbums: uniqueAlbums([...recent, ...home.rotating]).slice(0, 12),
-      moduleTitle: "Recent returns",
-      moduleNote: "A deterministic view of records that have crossed more than one listening year.",
-      leadAlbums: [recent[0] ?? featured, recent[1], recent[2]].filter((album): album is HomeAlbum => Boolean(album)),
+      lead: {
+        eyebrow: "Back in rotation",
+        headline: "Returned to, recently.",
+        rule: "Records heard again most recently after appearing in more than one listening year.",
+        body: recent[0] ? storyFor(recent[0]) : "A recent return supported by listening evidence across more than one year.",
+        albums: [recent[0] ?? featured, recent[1], recent[2]].filter((album): album is HomeAlbum => Boolean(album)),
+      },
+      sectionTwo: {
+        title: "Back in rotation.",
+        note: "The records that have reappeared most recently after crossing more than one listening year.",
+        albums: uniqueAlbums([...recent, ...home.rotating]).slice(0, 12),
+      },
+      sectionThree: {
+        title: "Recent returns",
+        note: "A deterministic view of records that have crossed more than one listening year.",
+        albums: uniqueAlbums([...recent, ...home.rotating]).slice(0, 4),
+      },
     },
     {
       ...issueMeta[2],
-      template: "C",
-      eyebrow: "From deeper in the archive",
-      headline: "Further back on the shelf.",
+      layoutId: "gallery-lead",
       slugline: "Deep archive",
-      rule: "Records ordered from the oldest last-heard evidence in the current archive.",
-      body: stale[0] ? storyFor(stale[0]) : "A record surfaced from the oldest last-heard evidence still represented in the archive.",
-      shelfTitle: "Not heard in a while.",
-      shelfNote: "A shelf pulled from the oldest last-heard evidence still represented in the archive.",
-      shelfAlbums: uniqueAlbums([...stale, ...home.shelf]).slice(0, 12),
-      moduleTitle: "Deep archive",
-      moduleNote: "A quieter pass through records whose last meaningful listen sits further back in time.",
-      leadAlbums: [stale[0] ?? featured, stale[1], stale[2]].filter((album): album is HomeAlbum => Boolean(album)),
+      lead: {
+        eyebrow: "From deeper in the archive",
+        headline: "Further back on the shelf.",
+        rule: "Records ordered from the oldest last-heard evidence in the current archive.",
+        body: stale[0] ? storyFor(stale[0]) : "A record surfaced from the oldest last-heard evidence still represented in the archive.",
+        albums: [stale[0] ?? featured, stale[1], stale[2]].filter((album): album is HomeAlbum => Boolean(album)),
+      },
+      sectionTwo: {
+        title: "Not heard in a while.",
+        note: "A shelf pulled from the oldest last-heard evidence still represented in the archive.",
+        albums: uniqueAlbums([...stale, ...home.shelf]).slice(0, 12),
+      },
+      sectionThree: {
+        title: "Deep archive",
+        note: "A quieter pass through records whose last meaningful listen sits further back in time.",
+        albums: uniqueAlbums([...stale, ...home.rotating]).slice(0, 4),
+      },
     },
   ];
 }

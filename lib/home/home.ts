@@ -231,14 +231,15 @@ export async function loadHome(database: HomeDatabase): Promise<HomeView> {
 }
 
 export function resolveHomeIssueIndex(date: Date = new Date()): number {
+  const firstIssueDay = Math.floor(Date.UTC(2026, 7, 27) / 86_400_000);
   const utcDay = Math.floor(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / 86_400_000);
-  return ((utcDay % 3) + 3) % 3;
+  return (((utcDay - firstIssueDay) % 3) + 3) % 3;
 }
 
 export function homeIssueNumber(date: Date = new Date()): number {
-  const start = Math.floor(Date.UTC(2026, 7, 28) / 86_400_000);
+  const start = Math.floor(Date.UTC(2026, 7, 27) / 86_400_000);
   const current = Math.floor(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / 86_400_000);
-  return Math.max(1, current - start + 1);
+  return Math.max(1, current - start + 214);
 }
 
 export function mapHomeAlbumRow(row: HomeAlbumRow): HomeAlbum {

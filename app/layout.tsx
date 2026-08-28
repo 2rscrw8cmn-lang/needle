@@ -6,9 +6,7 @@ import type { ReactNode } from "react";
 import { GlobalSearch } from "./components/global-search";
 import { SiteNav } from "./components/site-nav";
 import "./globals.css";
-import "./home-global.css";
 import "./global-search.css";
-import "./home-refinement.css";
 
 const bodoni = Bodoni_Moda({
   subsets: ["latin"],
