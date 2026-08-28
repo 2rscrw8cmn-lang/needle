@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import {
   LIBRARY_SORTS,
@@ -24,19 +24,23 @@ export function LibraryControls({
   hasCustomView,
   shownCount,
 }: LibraryControlsProps) {
-  const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   function updateView(name: "sort" | "decade" | "heard", value: string) {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
+
+    if (query.search) params.set("q", query.search);
+    if (query.sort !== "artist") params.set("sort", query.sort);
+    if (query.decade !== null) params.set("decade", String(query.decade));
+    if (query.listeningYear !== null) params.set("heard", String(query.listeningYear));
+
     if (value) params.set(name, value);
     else params.delete(name);
 
     if (name === "sort" && value === "artist") params.delete("sort");
 
     const next = params.toString();
-    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+    router.replace(next ? `/library?${next}` : "/library", { scroll: false });
   }
 
   return (
