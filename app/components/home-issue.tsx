@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useMemo, useState, type KeyboardEvent } from "react";
 
 import type { HomeAlbum, HomeHistoryYear, HomeView } from "../../lib/home/home";
 import { AlbumArtwork } from "./album-artwork";
