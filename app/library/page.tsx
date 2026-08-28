@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import { AlbumArtwork } from "../components/album-artwork";
 import {
-  LIBRARY_SORTS,
   LIBRARY_SORT_LABELS,
   countLibraryAlbums,
   loadLibraryAlbums,
@@ -14,6 +13,7 @@ import {
   type LibraryFacets,
   type NormalizedLibraryQuery,
 } from "../../lib/library/library";
+import { LibraryControls } from "./library-controls";
 import styles from "./library.module.css";
 
 export const metadata: Metadata = {
@@ -55,9 +55,9 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   } catch {
     return (
       <main className={styles.libraryPage}>
-        <LibraryHeader count={null} countLabel="albums" />
+        <LibraryHeader count={null} />
         <section className={styles.libraryState} aria-labelledby="library-error-title">
-          <p className="archive-label">Archive unavailable</p>
+          <p className={styles.stateEyebrow}>Archive unavailable</p>
           <h2 id="library-error-title">The library could not be read.</h2>
           <p>Needle could not reach the current archive. Try again after the database connection is available.</p>
         </section>
@@ -74,15 +74,17 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
 
   return (
     <main className={styles.libraryPage}>
-      <LibraryHeader
-        count={hasFilters ? albums.length : totalCount}
-        countLabel={hasFilters ? "matches" : totalCount === 1 ? "album" : "albums"}
+      <LibraryHeader count={totalCount} />
+      <LibraryControls
+        query={query}
+        facets={facets}
+        hasCustomView={hasCustomView}
+        shownCount={albums.length}
       />
-      <LibraryControls query={query} facets={facets} hasCustomView={hasCustomView} />
 
       {noArchive ? (
         <section className={styles.libraryState} aria-labelledby="library-empty-title">
-          <p className="archive-label">No records yet</p>
+          <p className={styles.stateEyebrow}>No records yet</p>
           <h2 id="library-empty-title">The archive is empty.</h2>
           <p>
             Albums appear here after Needle reconciles a Full or Near-Complete listen into the current archive.
@@ -90,119 +92,92 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         </section>
       ) : noMatches ? (
         <section className={styles.libraryState} aria-labelledby="library-filter-empty-title">
-          <p className="archive-label">No matches</p>
+          <p className={styles.stateEyebrow}>No matches</p>
           <h2 id="library-filter-empty-title">Nothing matches this view.</h2>
           <p>
-            Try another search or filter combination. <Link href="/library">Clear all controls</Link> to return to the full Library.
+            Try another archive view. <Link href="/library">Reset the Library</Link> to return to every record.
           </p>
         </section>
       ) : (
-        <section className={styles.libraryGrid} aria-label={`${albums.length} albums in the Library`}>
-          {albums.map((album) => (
-            <Link
-              className={styles.albumTile}
-              href={`/album/${encodeURIComponent(album.canonicalAlbumId)}`}
-              key={album.canonicalAlbumId}
-              aria-label={`${album.title} by ${album.artistName}`}
-            >
-              <AlbumArtwork
-                src={album.artworkUrl}
-                albumTitle={album.title}
-                artistName={album.artistName}
-                scale="grid"
-              />
-              <div className={styles.albumIdentity}>
-                <h2>{album.title}</h2>
-                <p>{album.artistName}</p>
-              </div>
-            </Link>
-          ))}
+        <section className={styles.archiveSection} aria-labelledby="library-view-title">
+          <div className={styles.archiveHeading}>
+            <div>
+              <p className={styles.archiveEyebrow}>Current view</p>
+              <h2 id="library-view-title">{libraryViewLabel(query)}</h2>
+            </div>
+            <p>{albums.length.toLocaleString()} {albums.length === 1 ? "record" : "records"}</p>
+          </div>
+
+          <div className={styles.libraryGrid} aria-label={`${albums.length} albums in the Library`}>
+            {albums.map((album) => (
+              <Link
+                className={styles.albumTile}
+                href={`/album/${encodeURIComponent(album.canonicalAlbumId)}`}
+                key={album.canonicalAlbumId}
+                aria-label={`${album.title} by ${album.artistName}`}
+              >
+                <AlbumArtwork
+                  src={album.artworkUrl}
+                  albumTitle={album.title}
+                  artistName={album.artistName}
+                  scale="grid"
+                />
+                <div className={styles.albumIdentity}>
+                  <h3>{album.title}</h3>
+                  <div className={styles.albumByline}>
+                    <p>{album.artistName}</p>
+                    <span>{archiveDateLabel(album)}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </section>
       )}
     </main>
   );
 }
 
-function LibraryHeader({ count, countLabel }: { count: number | null; countLabel: string }) {
+function LibraryHeader({ count }: { count: number | null }) {
   return (
     <header className={styles.libraryHeader}>
-      <div>
-        <p className="page-kicker">Find and inspect</p>
+      <div className={styles.libraryHeading}>
+        <p className={styles.libraryEyebrow}>Personal listening archive</p>
         <h1 className={styles.libraryTitle}>Library</h1>
       </div>
       <div
         className={styles.libraryHeaderMeta}
-        aria-label={count === null ? "Album count unavailable" : `${count} ${countLabel}`}
+        aria-label={count === null ? "Archive count unavailable" : `${count} records in the archive`}
       >
         <span>{count === null ? "—" : count.toLocaleString()}</span>
-        <small>{countLabel}</small>
+        <small>records</small>
       </div>
     </header>
   );
 }
 
-function LibraryControls({
-  query,
-  facets,
-  hasCustomView,
-}: {
-  query: NormalizedLibraryQuery;
-  facets: LibraryFacets;
-  hasCustomView: boolean;
-}) {
-  return (
-    <form className={styles.libraryControls} action="/library" method="get" role="search">
-      <div className={styles.librarySearch}>
-        <label htmlFor="library-search">Search library</label>
-        <div className={styles.librarySearchField}>
-          <input
-            id="library-search"
-            name="q"
-            type="search"
-            defaultValue={query.search}
-            placeholder="Album or artist"
-            autoComplete="off"
-          />
-        </div>
-      </div>
+function libraryViewLabel(query: NormalizedLibraryQuery): string {
+  if (query.search) return `Search: “${query.search}”`;
 
-      <div className={styles.libraryFilterBar}>
-        <label className={styles.controlField}>
-          <span>Sort</span>
-          <select name="sort" defaultValue={query.sort}>
-            {LIBRARY_SORTS.map((sort) => (
-              <option key={sort} value={sort}>{LIBRARY_SORT_LABELS[sort]}</option>
-            ))}
-          </select>
-        </label>
+  const filters: string[] = [];
+  if (query.decade !== null) filters.push(`${query.decade}s releases`);
+  if (query.listeningYear !== null) filters.push(`heard in ${query.listeningYear}`);
 
-        <label className={styles.controlField}>
-          <span>Release</span>
-          <select name="decade" defaultValue={query.decade ?? ""}>
-            <option value="">All decades</option>
-            {facets.decades.map((decade) => (
-              <option key={decade} value={decade}>{decade}s</option>
-            ))}
-          </select>
-        </label>
+  if (filters.length > 0) return filters.join(" · ");
+  return LIBRARY_SORT_LABELS[query.sort];
+}
 
-        <label className={styles.controlField}>
-          <span>Listened</span>
-          <select name="heard" defaultValue={query.listeningYear ?? ""}>
-            <option value="">All years</option>
-            {facets.listeningYears.map((year) => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
-        </label>
+function archiveDateLabel(album: LibraryAlbum): string {
+  const firstHeard = yearFromTimestamp(album.firstMeaningfulListenAt);
+  if (firstHeard !== null) return `First heard ${firstHeard}`;
+  if (album.releaseYear !== null) return `Released ${album.releaseYear}`;
+  return "Archive record";
+}
 
-        <div className={styles.controlActions}>
-          <button type="submit">Apply</button>
-          {hasCustomView ? <Link href="/library">Clear all</Link> : null}
-        </div>
-      </div>
-    </form>
-  );
+function yearFromTimestamp(value: string | null): number | null {
+  if (!value) return null;
+  const match = /^(\d{4})/.exec(value);
+  return match ? Number(match[1]) : null;
 }
 
 function firstParam(value: SearchParamValue): string | undefined {
