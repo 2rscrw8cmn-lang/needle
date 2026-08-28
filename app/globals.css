@@ -35,6 +35,7 @@
 
 html {
   background: var(--color-canvas);
+  overflow-x: clip;
 }
 
 html,
@@ -45,6 +46,7 @@ body {
 
 body {
   min-height: 100vh;
+  overflow-x: clip;
   background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-ui);
@@ -58,10 +60,23 @@ a {
   text-decoration: none;
 }
 
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+textarea:focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 4px;
 }
@@ -71,6 +86,31 @@ select:focus-visible {
   color: var(--color-canvas);
 }
 
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 12px;
+  left: 12px;
+  padding: 10px 12px;
+  transform: translateY(-150%);
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  font-family: var(--font-archive);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.site-frame,
+.site-content,
+main {
+  min-width: 0;
+}
+
 .site-frame {
   min-height: 100vh;
 }
@@ -78,16 +118,19 @@ select:focus-visible {
 .site-header {
   width: min(100%, var(--content-max));
   margin: 0 auto;
-  padding: 24px var(--page-gutter) 20px;
+  padding: 18px var(--page-gutter) 14px;
   border-bottom: var(--rule);
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-6);
 }
 
 .wordmark {
   flex: 0 0 auto;
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   font-family: var(--font-display);
   font-size: 25px;
   font-weight: 600;
@@ -96,6 +139,7 @@ select:focus-visible {
 }
 
 .site-nav {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: clamp(18px, 2.6vw, 38px);
@@ -103,7 +147,10 @@ select:focus-visible {
 
 .site-nav__link {
   position: relative;
-  padding: 5px 0;
+  flex: 0 0 auto;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   color: var(--color-muted);
   font-family: var(--font-archive);
   font-size: 11px;
@@ -123,7 +170,7 @@ select:focus-visible {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -21px;
+  bottom: -15px;
   height: 1px;
   background: var(--color-ink);
 }
@@ -147,6 +194,12 @@ select:focus-visible {
   line-height: 1.35;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.display-title,
+.page-title {
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 .display-title {
@@ -208,9 +261,10 @@ select:focus-visible {
 
 .text-link {
   display: inline-flex;
+  min-height: 44px;
   align-items: center;
   gap: 10px;
-  padding-bottom: 2px;
+  padding: 10px 0 8px;
   border-bottom: 1px solid currentColor;
   font-size: 14px;
   font-weight: 500;
@@ -232,12 +286,14 @@ select:focus-visible {
 }
 
 .route-intro__aside {
+  min-width: 0;
   padding-top: var(--space-5);
   border-top: var(--rule);
 }
 
 .route-intro__aside p {
   margin: 0;
+  overflow-wrap: anywhere;
   color: var(--color-muted);
   font-size: 14px;
   line-height: 1.6;
@@ -288,6 +344,8 @@ select:focus-visible {
 }
 
 .album-artwork--fallback span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   font-family: var(--font-archive);
   font-size: clamp(9px, 1vw, 11px);
   line-height: 1.4;
@@ -302,28 +360,37 @@ select:focus-visible {
   }
 
   .site-header {
-    padding-top: 20px;
-    padding-bottom: 14px;
-    display: block;
+    padding-top: 12px;
+    padding-bottom: 0;
+    display: grid;
+    gap: 2px;
   }
 
   .wordmark {
-    display: inline-block;
-    margin-bottom: 18px;
+    width: max-content;
   }
 
   .site-nav {
-    width: 100%;
-    justify-content: space-between;
-    gap: 12px;
+    width: calc(100% + (var(--page-gutter) * 2));
+    margin-left: calc(var(--page-gutter) * -1);
+    padding: 0 var(--page-gutter);
+    gap: 24px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .site-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .site-nav__link {
+    min-height: 48px;
     font-size: 10px;
   }
 
   .site-nav__link[aria-current="page"]::after {
-    bottom: -15px;
+    bottom: 0;
   }
 
   .page {
@@ -356,11 +423,23 @@ select:focus-visible {
   }
 }
 
+@media (max-width: 380px) {
+  :root {
+    --page-gutter: 16px;
+  }
+
+  .site-nav {
+    gap: 20px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

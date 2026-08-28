@@ -1,8 +1,10 @@
 .homePage {
+  min-width: 0;
   padding-bottom: var(--space-9);
 }
 
 .homeHeader {
+  min-width: 0;
   min-height: 460px;
   padding: clamp(72px, 10vw, 144px) 0 var(--space-8);
   border-bottom: var(--rule);
@@ -11,6 +13,8 @@
 .homeHeader h1 {
   max-width: 1080px;
   margin: 0;
+  overflow-wrap: anywhere;
+  hyphens: auto;
   font-family: var(--font-display);
   font-size: clamp(72px, 10.5vw, 150px);
   font-weight: 400;
@@ -21,18 +25,25 @@
 .homeHeader > p:last-child {
   max-width: 700px;
   margin: var(--space-7) 0 0;
+  overflow-wrap: anywhere;
   color: var(--color-muted);
   font-size: clamp(18px, 2vw, 24px);
   line-height: 1.45;
 }
 
 .featured {
+  min-width: 0;
   padding: var(--space-8) 0;
   border-bottom: var(--rule);
   display: grid;
   grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.18fr);
   gap: clamp(44px, 8vw, 128px);
   align-items: end;
+}
+
+.featuredArtwork,
+.featuredCopy {
+  min-width: 0;
 }
 
 .featuredArtwork {
@@ -47,11 +58,18 @@
 .featuredCopy h2 {
   max-width: 760px;
   margin: 0;
+  overflow-wrap: anywhere;
+  hyphens: auto;
   font-family: var(--font-display);
   font-size: clamp(54px, 7vw, 108px);
   font-weight: 400;
   line-height: 0.9;
   letter-spacing: -0.05em;
+}
+
+.featuredArtist,
+.featuredStory {
+  overflow-wrap: anywhere;
 }
 
 .featuredArtist {
@@ -68,11 +86,13 @@
 }
 
 .homeShelf {
+  min-width: 0;
   padding: var(--space-8) 0;
   border-bottom: var(--rule);
 }
 
 .shelfHeading {
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(150px, 0.27fr) minmax(0, 1fr);
   gap: var(--space-7);
@@ -85,7 +105,9 @@
 }
 
 .shelfHeading h2 {
+  min-width: 0;
   margin: 0;
+  overflow-wrap: anywhere;
   font-family: var(--font-display);
   font-size: clamp(42px, 5vw, 76px);
   font-weight: 400;
@@ -94,13 +116,16 @@
 }
 
 .shelfGrid {
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   column-gap: clamp(14px, 1.8vw, 28px);
   row-gap: var(--space-7);
 }
 
-.shelfAlbum {
+.shelfAlbum,
+.shelfAlbum a,
+.albumIdentity {
   min-width: 0;
 }
 
@@ -108,39 +133,44 @@
   padding-top: 10px;
 }
 
+.albumContext,
+.albumIdentity h3,
+.albumIdentity > p:last-child {
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+}
+
 .albumContext {
   margin: 0 0 6px;
-  overflow: hidden;
   color: var(--color-muted);
   font-family: var(--font-archive);
   font-size: 8px;
   letter-spacing: 0.05em;
-  text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
 .albumIdentity h3 {
   margin: 0;
-  overflow: hidden;
+  display: -webkit-box;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.3;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .albumIdentity > p:last-child {
   margin: 3px 0 0;
-  overflow: hidden;
   color: var(--color-muted);
   font-size: 12px;
   line-height: 1.3;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .homeFooter {
+  min-width: 0;
   padding: var(--space-7) 0;
   display: flex;
   justify-content: space-between;
@@ -151,18 +181,24 @@
 .homeFooter > p {
   max-width: 520px;
   margin: 0;
+  overflow-wrap: anywhere;
   color: var(--color-muted);
   font-size: 13px;
 }
 
 .homeFooter > div {
+  min-width: 0;
   display: flex;
-  gap: var(--space-5);
+  flex-wrap: wrap;
+  gap: 8px var(--space-5);
 }
 
 .homeFooter a,
 .homeState a {
-  padding-bottom: 2px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 0 6px;
   border-bottom: 1px solid currentColor;
   font-size: 13px;
 }
@@ -176,6 +212,7 @@
 .homeState h1 {
   max-width: 920px;
   margin: 0;
+  overflow-wrap: anywhere;
   font-family: var(--font-display);
   font-size: clamp(58px, 9vw, 126px);
   font-weight: 400;
@@ -186,16 +223,18 @@
 .homeState > p:last-of-type {
   max-width: 560px;
   margin: var(--space-6) 0 0;
+  overflow-wrap: anywhere;
   color: var(--color-muted);
 }
 
 .homeState a {
-  display: inline-block;
   margin-top: var(--space-6);
 }
 
 @media (max-width: 1100px) {
-  .shelfGrid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .shelfGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 860px) {
@@ -203,17 +242,24 @@
     grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
     gap: 40px;
   }
-  .shelfGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  .shelfGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 720px) {
   .homeHeader {
-    min-height: 360px;
-    padding-top: 56px;
+    min-height: 330px;
+    padding-top: 52px;
   }
 
   .homeHeader h1 {
-    font-size: clamp(66px, 20vw, 98px);
+    font-size: clamp(60px, 19vw, 94px);
+  }
+
+  .homeHeader > p:last-child {
+    margin-top: var(--space-6);
   }
 
   .featured {
@@ -221,10 +267,16 @@
     gap: var(--space-7);
   }
 
-  .featuredArtwork { max-width: none; }
+  .featuredArtwork {
+    max-width: none;
+  }
 
   .featuredCopy h2 {
-    font-size: clamp(52px, 16vw, 82px);
+    font-size: clamp(48px, 15vw, 78px);
+  }
+
+  .featuredStory {
+    margin-top: var(--space-6);
   }
 
   .shelfHeading {
@@ -238,8 +290,13 @@
     column-gap: 14px;
   }
 
-  .albumIdentity h3 { font-size: 12px; }
-  .albumIdentity > p:last-child { font-size: 11px; }
+  .albumIdentity h3 {
+    font-size: 12px;
+  }
+
+  .albumIdentity > p:last-child {
+    font-size: 11px;
+  }
 
   .homeFooter {
     align-items: flex-start;
@@ -248,7 +305,8 @@
   }
 
   .homeFooter > div {
+    width: 100%;
     flex-direction: column;
-    gap: 12px;
+    gap: 0;
   }
 }
