@@ -27,7 +27,7 @@ export default async function HomePage() {
     <HomeIssue
       home={home}
       initialIssueIndex={resolveHomeIssueIndex(now)}
-      issueNumber={homeIssueNumber(now)}
+      issueNumber={homeIssueNumber(now) + 2}
       issueDate={new Intl.DateTimeFormat("en-US", {
         month: "short",
         day: "2-digit",
