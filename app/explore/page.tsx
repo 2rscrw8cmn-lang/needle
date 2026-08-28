@@ -12,7 +12,8 @@ import {
   type LibraryFacets,
   type NormalizedLibraryQuery,
 } from "../../lib/library/library";
-import { loadExplore, type ExploreView } from "../../lib/explore/explore";
+import { loadExplore, type ExploreCrossTimeAlbum, type ExploreView } from "../../lib/explore/explore";
+import { BrowseIndex } from "./browse-index";
 import { ExploreControls } from "./explore-controls";
 import styles from "./explore.module.css";
 
@@ -68,81 +69,22 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     <main className={styles.explorePage}>
       <ExploreHeader count={totalCount} />
 
-      <section className={styles.discoverySection} aria-labelledby="ways-title">
-        <div className={styles.sectionHeading}>
-          <p className={styles.sectionEyebrow}>Ways into the archive</p>
-          <h2 id="ways-title">Take another route.</h2>
-        </div>
-        <div className={styles.routeGrid}>
-          <ExploreRoute
-            index="01"
-            href="/explore?sort=recent"
-            title="Recent returns"
-            description="Records closest to now."
-          />
-          <ExploreRoute
-            index="02"
-            href="/explore?sort=revisited"
-            title="Most revisited"
-            description="The records you keep coming back to."
-          />
-          <ExploreRoute
-            index="03"
-            href="/explore?sort=first"
-            title="First heard"
-            description="Start at the beginning of the archive."
-          />
-          <ExploreRoute
-            index="04"
-            href="#release-eras"
-            title="Release eras"
-            description="Move through the collection by decade."
-          />
-        </div>
-      </section>
-
       {explore.crossTimeAlbums.length > 0 ? (
-        <section className={styles.memorySection} aria-labelledby="memory-title">
-          <div className={styles.sectionHeadingCompact}>
-            <div>
-              <p className={styles.sectionEyebrow}>Across your history</p>
-              <h2 id="memory-title">Records with a long memory.</h2>
-            </div>
-            <p>Spanning multiple listening years</p>
-          </div>
-          <div className={styles.memoryShelf}>
-            {explore.crossTimeAlbums.slice(0, 8).map((album) => (
-              <Link
-                key={album.canonicalAlbumId}
-                href={`/album/${encodeURIComponent(album.canonicalAlbumId)}`}
-                className={styles.memoryRecord}
-              >
-                <AlbumArtwork
-                  src={album.artworkUrl}
-                  albumTitle={album.title}
-                  artistName={album.artistName}
-                  scale="shelf"
-                />
-                <div className={styles.memoryIdentity}>
-                  <span>{album.distinctListeningYears} listening years</span>
-                  <h3>{album.title}</h3>
-                  <p>{album.artistName}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <LongMemoryFeature albums={explore.crossTimeAlbums} />
       ) : null}
 
-      <section className={styles.archiveSection} aria-labelledby="archive-title">
+      <section className={styles.archiveSection} id="archive" aria-labelledby="archive-title">
         <div className={styles.archiveHeading}>
-          <div>
+          <div className={styles.archiveHeadingCopy}>
             <p className={styles.sectionEyebrow}>The archive</p>
-            <h2 id="archive-title">{archiveTitle(query)}</h2>
+            <h2 id="archive-title">The archive.</h2>
+            <p className={styles.archiveView}>{archiveViewLabel(query)}</p>
           </div>
-          {hasCustomView ? (
-            <p>{albums.length.toLocaleString()} of {totalCount.toLocaleString()}</p>
-          ) : null}
+          <p className={styles.archiveCount}>
+            {hasCustomView
+              ? `${albums.length.toLocaleString()} of ${totalCount.toLocaleString()}`
+              : `${totalCount.toLocaleString()} records`}
+          </p>
         </div>
 
         <ExploreControls query={query} facets={facets} hasCustomView={hasCustomView} />
@@ -151,7 +93,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
           <div className={styles.archiveEmpty}>
             <p className={styles.sectionEyebrow}>No matches</p>
             <h3>Nothing matches this route through the archive.</h3>
-            <Link href="/explore">Return to every record</Link>
+            <Link href="/explore#archive">Return to every record</Link>
           </div>
         ) : (
           <div className={styles.archiveGrid} aria-label={`${albums.length} records in the archive`}>
@@ -182,41 +124,11 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         )}
       </section>
 
-      <section className={styles.indexSection} id="release-eras" aria-labelledby="decade-title">
-        <div className={styles.sectionHeadingCompact}>
-          <div>
-            <p className={styles.sectionEyebrow}>Release index</p>
-            <h2 id="decade-title">By decade.</h2>
-          </div>
-        </div>
-        <div className={styles.decadeIndex}>
-          {explore.decades.map((item) => (
-            <Link key={item.decade} href={`/explore?decade=${item.decade}`}>
-              <strong>{item.decade}s</strong>
-              <span>{item.albumCount.toLocaleString()} {item.albumCount === 1 ? "record" : "records"}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {explore.artists.length > 0 ? (
-        <section className={styles.indexSection} aria-labelledby="artists-title">
-          <div className={styles.sectionHeadingCompact}>
-            <div>
-              <p className={styles.sectionEyebrow}>Collection index</p>
-              <h2 id="artists-title">Artists.</h2>
-            </div>
-          </div>
-          <div className={styles.artistIndex}>
-            {explore.artists.map((artist) => (
-              <Link key={artist.artistId} href={`/explore?q=${encodeURIComponent(artist.name)}`}>
-                <span>{artist.name}</span>
-                <small>{artist.albumCount.toLocaleString()}</small>
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      <BrowseIndex
+        artists={explore.artists}
+        decades={explore.decades}
+        listeningYears={facets.listeningYears}
+      />
     </main>
   );
 }
@@ -227,7 +139,7 @@ function ExploreHeader({ count }: { count: number }) {
       <div>
         <p className={styles.headerEyebrow}>Personal listening archive</p>
         <h1>Explore</h1>
-        <p className={styles.exploreLede}>Different ways into a listening archive.</p>
+        <p className={styles.exploreLede}>A listening archive, from different angles.</p>
       </div>
       <div className={styles.headerCount} aria-label={`${count} records in the archive`}>
         <span>{count.toLocaleString()}</span>
@@ -237,23 +149,63 @@ function ExploreHeader({ count }: { count: number }) {
   );
 }
 
-function ExploreRoute({
-  index,
-  href,
-  title,
-  description,
-}: {
-  index: string;
-  href: string;
-  title: string;
-  description: string;
-}) {
+function LongMemoryFeature({ albums }: { albums: ExploreCrossTimeAlbum[] }) {
+  const lead = albums[0];
+  const supporting = albums.slice(1, 5);
+  const firstYear = yearFromTimestamp(lead.firstMeaningfulListenAt);
+  const lastYear = yearFromTimestamp(lead.lastMeaningfulListenAt);
+
   return (
-    <Link href={href} className={styles.routeLink}>
-      <span>{index}</span>
-      <strong>{title}</strong>
-      <p>{description}</p>
-    </Link>
+    <section className={styles.featureSection} aria-labelledby="feature-title">
+      <div className={styles.featureIntro}>
+        <p className={styles.sectionEyebrow}>Long memory</p>
+        <h2 id="feature-title">Records that stayed.</h2>
+        <p>
+          A record that has kept showing up across the archive, surrounded by a few others with the same long reach.
+        </p>
+      </div>
+
+      <div className={styles.featureComposition}>
+        <Link
+          href={`/album/${encodeURIComponent(lead.canonicalAlbumId)}`}
+          className={styles.featureLead}
+        >
+          <AlbumArtwork
+            src={lead.artworkUrl}
+            albumTitle={lead.title}
+            artistName={lead.artistName}
+            scale="feature"
+          />
+          <div className={styles.featureLeadIdentity}>
+            <span>{featureSpanLabel(firstYear, lastYear, lead.distinctListeningYears)}</span>
+            <h3>{lead.title}</h3>
+            <p>{lead.artistName}</p>
+          </div>
+        </Link>
+
+        <div className={styles.featureSupporting}>
+          {supporting.map((album) => (
+            <Link
+              key={album.canonicalAlbumId}
+              href={`/album/${encodeURIComponent(album.canonicalAlbumId)}`}
+              className={styles.featureSupportRecord}
+            >
+              <AlbumArtwork
+                src={album.artworkUrl}
+                albumTitle={album.title}
+                artistName={album.artistName}
+                scale="shelf"
+              />
+              <div>
+                <span>{album.distinctListeningYears} listening years</span>
+                <h3>{album.title}</h3>
+                <p>{album.artistName}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -277,18 +229,18 @@ function ExploreUnavailable() {
   );
 }
 
-function archiveTitle(query: NormalizedLibraryQuery): string {
+function archiveViewLabel(query: NormalizedLibraryQuery): string {
   if (query.search) return `Matches for “${query.search}”`;
-  if (query.listeningYear !== null) return `Heard in ${query.listeningYear}.`;
-  if (query.decade !== null) return `${query.decade}s releases.`;
+  if (query.listeningYear !== null) return `Heard in ${query.listeningYear}`;
+  if (query.decade !== null) return `${query.decade}s releases`;
 
   switch (query.sort) {
-    case "album": return "Albums A–Z.";
-    case "release": return "Newest releases.";
-    case "recent": return "Recently listened.";
-    case "first": return "First heard.";
-    case "revisited": return "Most revisited.";
-    default: return "Every record.";
+    case "album": return "Albums A–Z";
+    case "release": return "Newest releases";
+    case "recent": return "Recently listened";
+    case "first": return "First heard";
+    case "revisited": return "Most revisited";
+    default: return "Every record, artist A–Z";
   }
 }
 
@@ -312,6 +264,11 @@ function archiveContext(album: LibraryAlbum, query: NormalizedLibraryQuery): str
     default:
       return null;
   }
+}
+
+function featureSpanLabel(firstYear: number | null, lastYear: number | null, years: number): string {
+  if (firstYear !== null && lastYear !== null && firstYear !== lastYear) return `${firstYear} → ${lastYear}`;
+  return `${years} listening years`;
 }
 
 function yearFromTimestamp(value: string | null): number | null {
