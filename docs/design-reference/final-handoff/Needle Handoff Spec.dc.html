@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><style>doc-page:not(:defined){visibility:hidden}body{margin:0}a{color:#1f5c4d}a:hover{color:#17161a}</style><script src="./doc-page.js"></script></helmet>
+
+<doc-page margin="0.8in">
+<div slot="footer" style="display:flex;justify-content:space-between;align-items:baseline;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a857c;border-top:1px solid rgba(23,22,26,.14);padding-top:8px">
+  <span>Needle &#183; visual redesign handoff</span>
+  <span>Rev A &#183; 28 Aug 2026</span>
+</div>
+
+<h1 style="font-family:'Bodoni Moda',serif;font-weight:400;font-size:42px;line-height:1.02;letter-spacing:-.02em;margin:0 0 14px;color:#17161a">Needle — redesign handoff</h1>
+<p style="font-family:Archivo,sans-serif;font-size:15.5px;line-height:1.62;color:#4c483f;margin:0 0 6px;max-width:34em">The mockups show the end state; this is the part they can't show — the tokens behind them, the interactions that only exist as motion, and the decisions someone will otherwise have to re-litigate. Read it alongside <em>Needle Redesign.dc.html</em>; option ids like <strong>3a</strong> and <strong>5d</strong> refer to that file.</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a857c;margin:0 0 30px">Canonical Home &#8212; 3a &#183; Nothing in here has been pushed to the repo</p>
+
+<h2 style="font-family:Archivo,sans-serif;font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#17161a;margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid #17161a">1 &#183; The idea in one paragraph</h2>
+<p style="font-family:Archivo,sans-serif;font-size:14.5px;line-height:1.66;color:#33302b;margin:0 0 26px;max-width:34em">Home is <strong>an issue, not a feed</strong>. It carries a number and a date, and turning it (the &#8249; &#8250; arrows in the masthead) swaps both the lead composition and the editorial rule that selected it. Everything below the lead is the archive seen from different angles: the shelf, one rotating module, the year history. The visual language is a print magazine — Bodoni display, a numbered margin column, catalog references set in mono — applied to a personal listening record.</p>
+
+<h2 style="font-family:Archivo,sans-serif;font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#17161a;margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid #17161a">2 &#183; Color</h2>
+<table style="width:100%;border-collapse:collapse;font-family:Archivo,sans-serif;font-size:13px;margin:0 0 10px">
+<thead><tr>
+  <th style="text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#6f6a62;padding:0 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.3)">Token</th>
+  <th style="text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#6f6a62;padding:0 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.3)">Value</th>
+  <th style="text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#6f6a62;padding:0 0 7px;border-bottom:1px solid rgba(23,22,26,.3)">Used for</th>
+</tr></thead>
+<tbody>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">paper</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px"><span style="display:inline-block;width:10px;height:10px;background:#f5f3ee;border:1px solid rgba(23,22,26,.25);margin-right:7px;vertical-align:baseline"></span>#f5f3ee</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">App background, sticky masthead fill</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">desk</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px"><span style="display:inline-block;width:10px;height:10px;background:#e8e5df;border:1px solid rgba(23,22,26,.25);margin-right:7px"></span>#e8e5df</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Canvas behind the frames only &#8212; not an app surface</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">ink</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px"><span style="display:inline-block;width:10px;height:10px;background:#17161a;margin-right:7px"></span>#17161a</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Headlines, active nav, primary text</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">ink-2</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px"><span style="display:inline-block;width:10px;height:10px;background:#4c483f;margin-right:7px"></span>#4c483f</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Body copy, artist names</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">ink-3</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px"><span style="display:inline-block;width:10px;height:10px;background:#6f6a62;margin-right:7px"></span>#6f6a62</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Eyebrows, catalog refs, margin notes, inactive nav</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">accent</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px"><span style="display:inline-block;width:10px;height:10px;background:#1f5c4d;margin-right:7px"></span>#1f5c4d</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Active nav underline, focus ring, &#8220;returning&#8221; series in the year chart</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">slot</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px"><span style="display:inline-block;width:10px;height:10px;background:#ddd8cf;margin-right:7px"></span>#ddd8cf</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Artwork placeholder / while art loads</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">rule</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">rgba(23,22,26,.14)</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Section hairlines. Inner/soft rules use .09&#8211;.10</td></tr>
+</tbody>
+</table>
+<p style="font-family:Archivo,sans-serif;font-size:13px;line-height:1.6;color:#6f6a62;margin:0 0 26px;max-width:34em">The accent is deliberately near-silent: one underline, one focus ring, one chart series. If a third accent use appears, something else should give one up. No gradients, no tinted cards, no colored buttons.</p>
+
+<h2 style="font-family:Archivo,sans-serif;font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#17161a;margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid #17161a">3 &#183; Type</h2>
+<p style="font-family:Archivo,sans-serif;font-size:14.5px;line-height:1.66;color:#33302b;margin:0 0 14px;max-width:34em">Three faces, one job each. <strong>Bodoni Moda</strong> (400) is display only — headlines, album titles, the selected year, and italic for editorial asides like the issue rule. <strong>Archivo</strong> is every piece of UI and body text. <strong>IBM Plex Mono</strong> is metadata: eyebrows, catalog refs, nav, margin numerals — always uppercase with .14&#8211;.18em tracking. A face never crosses into another's job.</p>
+<table style="width:100%;border-collapse:collapse;font-family:Archivo,sans-serif;font-size:13px;margin:0 0 12px">
+<thead><tr>
+  <th style="text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#6f6a62;padding:0 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.3)">Role</th>
+  <th style="text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#6f6a62;padding:0 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.3)">Desktop</th>
+  <th style="text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#6f6a62;padding:0 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.3)">Mobile</th>
+  <th style="text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#6f6a62;padding:0 0 7px;border-bottom:1px solid rgba(23,22,26,.3)">Notes</th>
+</tr></thead>
+<tbody>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1)">Lead headline</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">72 / 88 / 104</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">42</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Per lead template A/B/C. LH .88&#8211;.98, LS &#8722;.025 to &#8722;.035em</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1)">Masthead wordmark</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">26</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">22</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Bodoni, LS &#8722;.01em</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1)">Album title</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">20&#8211;22</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">19</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Bodoni. In grids of 4+, drops to Archivo 13</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1)">Body</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">16</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">15</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">LH 1.6, max-width 370&#8211;520px, <code>text-wrap: pretty</code></td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1)">Rail value</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">17&#8211;19</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">15</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Archivo, over a mono key at 9.5</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1)">Nav / eyebrow</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">11 / 10</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">10.5</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Mono uppercase, LS .16&#8211;.18em</td></tr>
+  <tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1)">Catalog ref / margin</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">9 / 9.5</td><td style="padding:7px 10px 7px 0;border-bottom:1px solid rgba(23,22,26,.1);font-family:'IBM Plex Mono',monospace;font-size:11.5px">9</td><td style="padding:7px 0;border-bottom:1px solid rgba(23,22,26,.1);color:#4c483f">Floor for the system &#8212; never smaller</td></tr>
+</tbody>
+</table>
+<p style="font-family:Archivo,sans-serif;font-size:13px;line-height:1.6;color:#6f6a62;margin:0 0 26px;max-width:34em">Bodoni at 72px+ needs its optical size axis set high (<code>opsz</code> follows font-size automatically in the variable font — don't pin it).</p>
+
+<h2 style="font-family:Archivo,sans-serif;font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#17161a;margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid #17161a">4 &#183; Grid &amp; spacing</h2>
+<p style="font-family:Archivo,sans-serif;font-size:14.5px;line-height:1.66;color:#33302b;margin:0 0 26px;max-width:34em">Desktop page gutter is <strong>56px</strong>; the left <strong>200px margin column</strong> is structural, not decorative — it holds the roman section numeral (I, II, III, IV) and a two-line note, and it is what makes the page read as a spread. Sections are separated by a hairline plus 16&#8211;34px of lead-in, never by cards or shadows. Artwork is always <code>aspect-ratio: 1</code>; the lead hero carries <code>0 20px 46px rgba(23,22,26,.18)</code>, grid items a lighter <code>0 14px 32px rgba(23,22,26,.13)</code>, shelf thumbs none. Hover on any artwork is <code>translateY(&#8722;4px)</code> over <strong>.18s ease</strong> — the only hover motion in the system. Mobile collapses to a 20px gutter and turns margin notes into inline rules above their section.</p>
+
+<h2 style="font-family:Archivo,sans-serif;font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#17161a;margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid #17161a">5 &#183; Interactions the mockups can't show</h2>
+
+<div style="break-inside:avoid;orphans:3;widows:3;border-left:2px solid #1f5c4d;padding:2px 0 2px 16px;margin:0 0 18px">
+  <h3 style="font-family:Archivo,sans-serif;font-weight:600;font-size:13.5px;color:#17161a;margin:0 0 6px">Turning the issue</h3>
+  <p style="font-family:Archivo,sans-serif;font-size:14px;line-height:1.62;color:#33302b;margin:0;max-width:33em">The &#8249; &#8250; arrows advance through a fixed rotation of <strong>three lead templates paired with three story rules</strong> (A: portrait + rail; B: stacked with a pair; C: full-width headline + trio). Template and rule advance together — they are one unit, not two independent axes. The issue number and date change with them, and the rule is always restated in the margin so the selection is never unexplained. Rotation is authored/scheduled server-side, not random per load: two people opening Needle on the same day should see the same issue.</p>
+</div>
+
+<div style="break-inside:avoid;orphans:3;widows:3;border-left:2px solid #1f5c4d;padding:2px 0 2px 16px;margin:0 0 18px">
+  <h3 style="font-family:Archivo,sans-serif;font-weight:600;font-size:13.5px;color:#17161a;margin:0 0 6px">Scroll snapping &#8212; decided</h3>
+  <p style="font-family:Archivo,sans-serif;font-size:14px;line-height:1.62;color:#33302b;margin:0 0 8px;max-width:33em">Home has <strong>exactly one vertical snap point</strong>, at the top of the issue bar, so the cover composition parks intact and the issue-turn arrows stay put while you use them. Everything below it scrolls free.</p>
+  <ul style="font-family:Archivo,sans-serif;font-size:14px;line-height:1.6;color:#33302b;margin:0;padding-left:18px;max-width:33em">
+    <li style="margin-bottom:4px"><code>scroll-snap-type: y proximity</code> &#8212; never <code>mandatory</code>; the reader must always be able to stop mid-section.</li>
+    <li style="margin-bottom:4px"><code>scroll-padding-top</code> must equal the real sticky masthead height (<strong>84px</strong> desktop). Mismatch parks the issue bar behind the masthead — this bit us once.</li>
+    <li style="margin-bottom:4px">Horizontal shelves keep <code>x proximity</code> with <code>scroll-snap-align: start</code> per item.</li>
+    <li>Library, History, Explore and Album detail get <strong>no vertical snapping</strong> — they are scan-and-hunt surfaces, and snapping fights the eye.</li>
+  </ul>
+</div>
+
+<div style="break-inside:avoid;orphans:3;widows:3;border-left:2px solid #1f5c4d;padding:2px 0 2px 16px;margin:0 0 26px">
+  <h3 style="font-family:Archivo,sans-serif;font-weight:600;font-size:13.5px;color:#17161a;margin:0 0 6px">Year chart (History, 4a)</h3>
+  <p style="font-family:Archivo,sans-serif;font-size:14px;line-height:1.62;color:#33302b;margin:0;max-width:33em">Bars are click-to-select, not hover-preview; the selected year fills in ink and updates the panel to its right (album count, Full Plays). Bar height is scaled against the single busiest year (142 in the sample data), so the chart re-scales as data grows rather than clipping. Keyboard: left/right arrows move selection, and the selected bar must carry the accent focus ring.</p>
+</div>
+
+<h2 style="font-family:Archivo,sans-serif;font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#17161a;margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid #17161a">6 &#183; States (5d)</h2>
+<p style="font-family:Archivo,sans-serif;font-size:14.5px;line-height:1.66;color:#33302b;margin:0 0 26px;max-width:34em">The empty archive is the one that matters: a new user has no issue, so Home shows the masthead, an italic Bodoni line explaining what will appear, and a single import action — not a zero-state illustration. Loading uses <strong>slot</strong> blocks at the artwork's true aspect ratio with no spinner and no shimmer; the layout must not move when art arrives. Errors are set as a margin note in mono beside the affected section, and never replace the whole page. Focus is a <strong>2px accent outline at 3px offset</strong>, everywhere, including artwork tiles. Mobile hit targets are 44px minimum — the issue arrows are 44&#215;32 with a 44px tap area.</p>
+
+<h2 style="font-family:Archivo,sans-serif;font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#17161a;margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid #17161a">7 &#183; Open questions</h2>
+<ol style="font-family:Archivo,sans-serif;font-size:14.5px;line-height:1.64;color:#33302b;margin:0 0 26px;padding-left:20px;max-width:34em">
+  <li style="margin-bottom:7px"><strong>Artwork rights and resolution.</strong> Every slot in the mockups is a placeholder. Leads need ~1200px square; shelf thumbs 296px. Source and licensing are unresolved.</li>
+  <li style="margin-bottom:7px"><strong>Dark mode.</strong> Not designed. The palette inverts badly as-is (Bodoni hairlines vanish); it needs its own pass, not a filter.</li>
+  <li style="margin-bottom:7px"><strong>Rotation cadence.</strong> Daily? Weekly? Per session? This determines whether the issue number is a real sequence or cosmetic.</li>
+  <li style="margin-bottom:7px"><strong>Rule authoring.</strong> Three story rules exist. Who writes the fourth, and are they code or content?</li>
+  <li><strong>Thin archives.</strong> Templates B and C need 3 and 4 albums respectively. What does the lead do for a user with two records?</li>
+</ol>
+</doc-page>
+
+</x-dc>
+</body>
+</html>
