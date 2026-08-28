@@ -42,12 +42,12 @@ LIMIT 10
 export const HOME_STALE_SQL = `${HOME_BASE_SELECT}
 ORDER BY
   CASE WHEN s.last_meaningful_listen_at IS NULL THEN 1 ELSE 0 END ASC,
-  s.last_meaning_listen_at ASC,
+  s.last_meaningful_listen_at ASC,
   s.qualifying_session_count DESC,
   a.primary_artist_name COLLATE NOCASE ASC,
   a.title COLLATE NOCASE ASC
 LIMIT 16
-`.replace("s.last_meaning_listen_at", "s.last_meaningful_listen_at");
+`;
 
 export const HOME_SHELF_SQL = `${HOME_BASE_SELECT}
 ORDER BY
