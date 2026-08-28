@@ -1,0 +1,10 @@
+html:has(.home-shell) {
+  scroll-snap-type: y proximity;
+  scroll-padding-top: var(--masthead-height);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.home-shell) {
+    scroll-snap-type: none;
+  }
+}
