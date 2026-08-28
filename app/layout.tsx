@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { SiteNav } from "./components/site-nav";
 import "./globals.css";
+import "./home-global.css";
 
 const bodoni = Bodoni_Moda({
   subsets: ["latin"],
