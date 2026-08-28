@@ -1,0 +1,180 @@
+html:has(.home-shell) {
+  scroll-snap-type: y proximity;
+  scroll-padding-top: var(--masthead-height);
+}
+
+.home-shell > section[aria-label="Needle issue index"] {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-bottom: var(--rule);
+  scroll-snap-align: start;
+}
+
+.home-shell > section[aria-label="Needle issue index"] > button {
+  min-width: 0;
+  min-height: 72px;
+  border: 0;
+  border-right: var(--rule);
+  border-radius: 0;
+  padding: 13px 20px 12px;
+  display: grid;
+  gap: 5px;
+  align-content: center;
+  text-align: left;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.home-shell > section[aria-label="Needle issue index"] > button:first-child {
+  padding-left: var(--page-gutter);
+}
+
+.home-shell > section[aria-label="Needle issue index"] > button:last-child {
+  padding-right: var(--page-gutter);
+  border-right: 0;
+}
+
+.home-shell > section[aria-label="Needle issue index"] > button > span {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-family: var(--font-archive);
+  font-size: 8.5px;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-shell > section[aria-label="Needle issue index"] > button > strong {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-shell > section[aria-label="Needle issue index"] > button[data-selected="true"] {
+  background: rgba(23, 22, 26, 0.035);
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+
+@media (min-width: 1101px) {
+  .home-shell > section[aria-labelledby="home-lead-title"] {
+    height: 640px;
+    min-height: 640px;
+    max-height: 640px;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] > :last-child {
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] > :last-child > div {
+    min-width: 0;
+    height: 100%;
+    max-width: 100%;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] .album-artwork--feature {
+    width: min(100%, 430px);
+    max-width: 430px;
+  }
+}
+
+@media (max-width: 1320px) and (min-width: 1101px) {
+  .home-shell > section[aria-labelledby="home-lead-title"] .album-artwork--feature {
+    width: min(100%, 390px);
+    max-width: 390px;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] h1 {
+    font-size: clamp(56px, 5.2vw, 72px);
+  }
+}
+
+@media (max-width: 720px) {
+  html:has(.home-shell) {
+    scroll-snap-type: none;
+  }
+
+  .home-shell > section[aria-label="Needle issue index"] {
+    display: flex;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .home-shell > section[aria-label="Needle issue index"]::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-shell > section[aria-label="Needle issue index"] > button,
+  .home-shell > section[aria-label="Needle issue index"] > button:first-child,
+  .home-shell > section[aria-label="Needle issue index"] > button:last-child {
+    flex: 0 0 72%;
+    min-height: 58px;
+    padding: 10px 14px;
+    scroll-snap-align: start;
+  }
+
+  .home-shell > section[aria-label="Needle issue index"] > button:first-child {
+    padding-left: var(--page-gutter);
+  }
+
+  .home-shell > section[aria-label="Needle issue index"] > button > strong {
+    font-size: 16px;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] > :last-child {
+    padding-top: 20px;
+    padding-bottom: 28px;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] h1 {
+    font-size: 38px;
+    line-height: 0.98;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] .album-artwork--feature {
+    width: min(72vw, 260px);
+    max-width: 260px;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] .album-artwork--grid {
+    box-shadow: none;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] dl {
+    display: none;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] a[href^="/album/"] {
+    max-width: 100%;
+  }
+
+  .home-shell > section[aria-labelledby="home-lead-title"] p {
+    max-width: 34em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.home-shell) {
+    scroll-snap-type: none;
+  }
+}

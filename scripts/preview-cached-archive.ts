@@ -8,17 +8,20 @@ import {
 import {
   buildCachedArchivePreview,
   createCachedSpotifyCatalogProvider,
+  createCachedSpotifyEnrichmentProvider,
   writeCachedArchivePreviewManifest,
 } from "../lib/import/cached-archive-preview.ts";
 import {
   renderArchiveReconciliationReportMarkdown,
   writeArchiveReconciliationOutputs,
 } from "../lib/import/archive-reconciler.ts";
+import { enrichResolvedAlbums } from "../lib/import/spotify-enrichment.ts";
 
 interface CliOptions {
   inputDir: string;
   outputDir: string;
   cachePath: string;
+  enrichmentCachePath: string;
   market: string;
   help: boolean;
 }
@@ -41,11 +44,26 @@ try {
     provider: cached.provider,
     providerName: "spotify",
   });
+  const cachedEnrichment = await createCachedSpotifyEnrichmentProvider({
+    cachePath: options.enrichmentCachePath,
+    market: options.market,
+  });
+  const enrichment = await enrichResolvedAlbums({
+    artifacts: {
+      canonicalAlbums: resolution.canonicalAlbums,
+      editions: resolution.editions,
+    },
+    provider: cachedEnrichment.provider,
+    providerName: "spotify",
+    market: options.market,
+  });
   const preview = buildCachedArchivePreview({
     stageThree,
     resolution,
     market: options.market,
     cacheStats: cached.stats,
+    enrichment,
+    enrichmentCacheEntries: cachedEnrichment.albumEntries,
   });
 
   await mkdir(options.outputDir, { recursive: true });
@@ -58,7 +76,10 @@ try {
   console.log("# Needle Cached Archive Preview");
   console.log("");
   console.log("LOCAL PREVIEW ONLY — no Spotify API requests were made.");
-  console.log(`Cache: ${cached.stats.tracks} tracks / ${cached.stats.searches} searches / ${cached.stats.albumTrackLists} album track lists`);
+  console.log(`Resolution cache: ${cached.stats.tracks} tracks / ${cached.stats.searches} searches / ${cached.stats.albumTrackLists} album track lists`);
+  console.log(`Enrichment cache: ${cachedEnrichment.albumEntries} album entries`);
+  console.log(`Cached enriched albums used: ${enrichment.report.totals.enrichedAlbums}`);
+  console.log(`Cached albums with artwork: ${enrichment.report.totals.albumsWithArtwork}`);
   console.log(`Resolved source albums: ${preview.manifest.totals.resolved_source_albums}/${preview.manifest.totals.source_albums}`);
   console.log(`Canonical albums: ${preview.manifest.totals.canonical_albums}`);
   console.log(`Preview Library members: ${preview.manifest.totals.library_members}`);
@@ -76,6 +97,7 @@ function parseArgs(args: string[]): CliOptions {
     inputDir: defaultInput,
     outputDir: path.join(defaultInput, "preview"),
     cachePath: path.join(defaultInput, "spotify-resolution-cache.json"),
+    enrichmentCachePath: path.join(defaultInput, "spotify-enrichment-cache.json"),
     market: (process.env.SPOTIFY_MARKET ?? "US").toUpperCase(),
     help: false,
   };
@@ -90,6 +112,7 @@ function parseArgs(args: string[]): CliOptions {
       parsed.inputDir = path.resolve(requireValue(args, ++index, "--input"));
       parsed.outputDir = path.join(parsed.inputDir, "preview");
       parsed.cachePath = path.join(parsed.inputDir, "spotify-resolution-cache.json");
+      parsed.enrichmentCachePath = path.join(parsed.inputDir, "spotify-enrichment-cache.json");
       continue;
     }
     if (arg === "--output") {
@@ -98,6 +121,10 @@ function parseArgs(args: string[]): CliOptions {
     }
     if (arg === "--cache") {
       parsed.cachePath = path.resolve(requireValue(args, ++index, "--cache"));
+      continue;
+    }
+    if (arg === "--enrichment-cache") {
+      parsed.enrichmentCachePath = path.resolve(requireValue(args, ++index, "--enrichment-cache"));
       continue;
     }
     if (arg === "--market") {
@@ -117,5 +144,5 @@ function requireValue(args: string[], index: number, option: string): string {
 }
 
 function printHelp(): void {
-  console.log(`Needle cached archive preview\n\nUsage:\n  npm run history:preview-cached -- [options]\n\nOptions:\n  --input <dir>   Existing 1.03/private artifact directory (default: data/history/.needle)\n  --output <dir>  Preview output directory (default: <input>/preview)\n  --cache <file>  Existing Spotify resolution cache (default: <input>/spotify-resolution-cache.json)\n  --market <CC>   Cache market (default: SPOTIFY_MARKET or US)\n  --help          Show this help\n\nThis command is cache-only: it does not use Spotify credentials or make network requests.\nPreview outputs are local-only and must not be loaded into remote/production D1.`);
+  console.log(`Needle cached archive preview\n\nUsage:\n  npm run history:preview-cached -- [options]\n\nOptions:\n  --input <dir>              Existing 1.03/private artifact directory (default: data/history/.needle)\n  --output <dir>             Preview output directory (default: <input>/preview)\n  --cache <file>             Existing Spotify resolution cache (default: <input>/spotify-resolution-cache.json)\n  --enrichment-cache <file>  Existing partial Spotify enrichment cache (default: <input>/spotify-enrichment-cache.json)\n  --market <CC>              Cache market (default: SPOTIFY_MARKET or US)\n  --help                     Show this help\n\nThis command is cache-only: it does not use Spotify credentials or make network requests.\nPreview outputs are local-only and must not be loaded into remote/production D1.`);
 }

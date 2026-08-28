@@ -1,0 +1,342 @@
+/* Visual correction pass after real-data QA. Keep these rules global and late-loaded so
+   the three issue templates share one reliable canvas without duplicating layout math. */
+
+.home-shell {
+  width: min(100%, 1680px);
+  margin-inline: auto;
+  overflow: clip;
+}
+
+/* 7a slugline index: one quiet strip, not a second navigation bar. */
+.home-shell > section:first-child {
+  min-height: 64px !important;
+  padding: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  border-bottom: var(--rule) !important;
+  background: var(--paper);
+}
+
+.home-shell > section:first-child > button {
+  position: relative;
+  min-width: 0;
+  min-height: 64px !important;
+  padding: 11px clamp(18px, 2.4vw, 34px) 10px !important;
+  border: 0 !important;
+  border-right: 1px solid var(--rule-soft) !important;
+  background: transparent !important;
+  text-align: left;
+}
+
+.home-shell > section:first-child > button:last-child {
+  border-right: 0 !important;
+}
+
+.home-shell > section:first-child > button[data-selected="true"] {
+  background: rgba(23, 22, 26, 0.018) !important;
+  box-shadow: inset 0 2px 0 var(--accent) !important;
+}
+
+.home-shell > section:first-child > button > span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink-3);
+  font-family: var(--font-archive);
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.home-shell > section:first-child > button > strong {
+  display: block;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 1101px) {
+  /* A/B/C all live inside the same fixed editorial frame. */
+  .home-shell > section:nth-child(2) {
+    height: 640px;
+    min-height: 640px;
+    grid-template-columns: 172px minmax(0, 1fr) !important;
+    overflow: hidden;
+  }
+
+  .home-shell > section:nth-child(2) > aside,
+  .home-shell > section:nth-child(n + 3) > aside {
+    padding-left: 34px !important;
+    padding-right: 22px !important;
+  }
+
+  .home-shell > section:nth-child(2) > div {
+    min-width: 0;
+    height: 100%;
+    padding: 34px 44px 34px 36px !important;
+    overflow: hidden;
+  }
+
+  .home-shell > section:nth-child(2) > div > div {
+    min-width: 0;
+    height: 100%;
+  }
+
+  .home-shell > section:nth-child(2) h1 {
+    max-width: 520px !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    hyphens: none !important;
+    font-size: clamp(54px, 4.45vw, 70px) !important;
+    line-height: 0.94 !important;
+    letter-spacing: -0.028em !important;
+    text-wrap: balance;
+  }
+
+  /* Template A: story / hero / three metrics. */
+  .home-shell > section:nth-child(2) > div > div:has(> dl) {
+    display: grid !important;
+    grid-template-columns: minmax(310px, 0.82fr) minmax(390px, 1.15fr) minmax(132px, 0.36fr) !important;
+    gap: clamp(28px, 3vw, 48px) !important;
+    align-items: stretch !important;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> dl) > div:first-child {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> dl) > a {
+    grid-column: 2;
+    align-self: center;
+    width: min(100%, 500px);
+    justify-self: center;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> dl) > dl {
+    grid-column: 3;
+    padding-left: 18px !important;
+  }
+
+  /* Only the three useful editorial metrics belong in a lead. */
+  .home-shell > section:nth-child(2) dl > div:nth-child(n + 4) {
+    display: none !important;
+  }
+
+  .home-shell > section:nth-child(2) dl {
+    grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  /* Template B: same story width, one hero, quiet support rail. */
+  .home-shell > section:nth-child(2) > div > div:has(> div > dl) {
+    display: grid !important;
+    grid-template-columns: minmax(320px, 0.78fr) minmax(0, 1.32fr) !important;
+    gap: clamp(36px, 4vw, 64px) !important;
+    align-items: stretch !important;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div > dl) > div:first-child {
+    min-height: 0 !important;
+    padding-top: 54px !important;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div > dl) > div:last-child {
+    min-width: 0;
+    height: 100%;
+    display: grid !important;
+    grid-template-columns: minmax(360px, 1fr) 148px !important;
+    grid-template-rows: 1fr auto !important;
+    gap: 16px 20px !important;
+    align-items: end !important;
+    overflow: hidden;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div > dl) > div:last-child > a {
+    width: min(100%, 470px);
+    align-self: center;
+    justify-self: center;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div > dl) > div:last-child > div {
+    display: grid !important;
+    gap: 16px !important;
+    align-self: center;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div > dl) > div:last-child > dl {
+    grid-column: 1 / -1 !important;
+    min-height: 76px !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  /* Template C: story / one hero with two small supporting records, not three equal posters. */
+  .home-shell > section:nth-child(2) > div > div:has(> div:last-child > a:nth-child(3)) {
+    display: grid !important;
+    grid-template-columns: minmax(330px, 0.8fr) minmax(0, 1.2fr) !important;
+    gap: clamp(38px, 4vw, 68px) !important;
+    align-items: stretch !important;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div:last-child > a:nth-child(3)) > div:first-child {
+    min-width: 0;
+    padding-top: 34px;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div:last-child > a:nth-child(3)) > div:first-child > div {
+    margin-top: 24px !important;
+    display: block !important;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div:last-child > a:nth-child(3)) > div:last-child {
+    min-width: 0;
+    display: grid !important;
+    grid-template-columns: minmax(360px, 1fr) 148px !important;
+    grid-template-rows: 1fr 1fr !important;
+    gap: 16px 20px !important;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div:last-child > a:nth-child(3)) > div:last-child > a:first-child {
+    grid-row: 1 / 3;
+    width: min(100%, 470px);
+    justify-self: center;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div:last-child > a:nth-child(3)) > div:last-child > a:not(:first-child) {
+    width: 148px;
+  }
+
+  /* Keep section hierarchy clearly below the lead. */
+  .home-shell > section:nth-child(n + 3) h2 {
+    font-size: clamp(40px, 3.6vw, 54px) !important;
+    line-height: 0.98 !important;
+  }
+
+  .home-shell > section:nth-child(n + 3) > div {
+    padding-right: 44px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .home-shell {
+    width: 100%;
+  }
+
+  .home-shell > section:nth-child(2) > div > div {
+    max-width: 860px;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .home-shell > section:first-child {
+    min-height: 58px !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    overflow: hidden !important;
+  }
+
+  .home-shell > section:first-child > button {
+    min-height: 58px !important;
+    padding: 8px 8px 7px !important;
+    overflow: hidden;
+  }
+
+  .home-shell > section:first-child > button > span {
+    margin-bottom: 3px;
+    overflow: hidden;
+    font-size: 6.5px;
+    letter-spacing: 0.08em;
+    text-overflow: ellipsis;
+  }
+
+  .home-shell > section:first-child > button > strong {
+    font-size: 12px;
+    line-height: 1.05;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .home-shell > section:nth-child(2) {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .home-shell > section:nth-child(2) > div {
+    padding: 24px 16px 28px !important;
+  }
+
+  .home-shell > section:nth-child(2) > div > div,
+  .home-shell > section:nth-child(2) > div > div:has(> dl),
+  .home-shell > section:nth-child(2) > div > div:has(> div > dl),
+  .home-shell > section:nth-child(2) > div > div:has(> div:last-child > a:nth-child(3)) {
+    display: block !important;
+    height: auto !important;
+  }
+
+  .home-shell > section:nth-child(2) h1 {
+    max-width: none !important;
+    font-size: 34px !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.022em !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  .home-shell > section:nth-child(2) p {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .home-shell > section:nth-child(2) dl,
+  .home-shell > section:nth-child(2) > div > div:has(> div > dl) > div:last-child > div,
+  .home-shell > section:nth-child(2) > div > div:has(> div:last-child > a:nth-child(3)) > div:last-child > a:not(:first-child) {
+    display: none !important;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div > dl) > div:first-child {
+    padding-top: 0 !important;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> div > dl) > div:last-child,
+  .home-shell > section:nth-child(2) > div > div:has(> div:last-child > a:nth-child(3)) > div:last-child {
+    display: block !important;
+    height: auto !important;
+    margin-top: 22px;
+  }
+
+  .home-shell > section:nth-child(2) > div > div:has(> dl) > a,
+  .home-shell > section:nth-child(2) > div > div:has(> div > dl) > div:last-child > a,
+  .home-shell > section:nth-child(2) > div > div:has(> div:last-child > a:nth-child(3)) > div:last-child > a:first-child {
+    width: min(100%, 230px) !important;
+    margin-top: 22px;
+    margin-inline: 0 !important;
+    display: block !important;
+  }
+
+  .home-shell > section:nth-child(n + 3) > div > p:first-child {
+    display: none !important;
+  }
+
+  .home-shell > section:nth-child(n + 3) > div {
+    padding: 24px 16px 36px !important;
+  }
+
+  .home-shell > section:nth-child(n + 3) h2 {
+    font-size: 34px !important;
+    line-height: 1 !important;
+  }
+
+  .home-shell > section:nth-child(n + 3) {
+    border-top: 1px solid var(--rule-color) !important;
+  }
+}
