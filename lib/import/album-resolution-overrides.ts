@@ -28,7 +28,8 @@ export async function readManualAlbumResolutionOverrides(
   filePath: string,
 ): Promise<ManualAlbumResolutionOverrideFile> {
   try {
-    const raw = JSON.parse(await readFile(filePath, "utf8")) as unknown;
+    const text = await readFile(filePath, "utf8");
+    const raw = JSON.parse(text.replace(/^\uFEFF/, "")) as unknown;
     assertOverrideFile(raw);
     return raw;
   } catch (error: unknown) {
