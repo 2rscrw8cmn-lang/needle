@@ -1,6 +1,10 @@
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   applyManualAlbumResolutionOverrides,
+  readManualAlbumResolutionOverrides,
   type ManualAlbumResolutionOverrideFile,
 } from "../lib/import/album-resolution-overrides.ts";
 import type {
@@ -111,6 +115,17 @@ const overrideFile: ManualAlbumResolutionOverrideFile = {
 };
 
 describe("album resolution overrides", () => {
+  it("reads Windows PowerShell UTF-8 BOM files", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "needle-album-overrides-"));
+    const file = path.join(dir, "album-resolution-overrides.json");
+    try {
+      await writeFile(file, `\uFEFF${JSON.stringify(overrideFile)}`, "utf8");
+      await expect(readManualAlbumResolutionOverrides(file)).resolves.toEqual(overrideFile);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   it("approves only the chosen candidate and recomputes resolution counts", () => {
     const { result, summary } = applyManualAlbumResolutionOverrides(ambiguousResult(), overrideFile);
 
