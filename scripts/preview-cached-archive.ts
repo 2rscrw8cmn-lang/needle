@@ -6,6 +6,10 @@ import {
   writeAlbumResolutionOutputs,
 } from "../lib/import/album-resolver.ts";
 import {
+  applyManualAlbumResolutionOverrides,
+  readManualAlbumResolutionOverrides,
+} from "../lib/import/album-resolution-overrides.ts";
+import {
   buildCachedArchivePreview,
   createCachedSpotifyCatalogProvider,
   createCachedSpotifyEnrichmentProvider,
@@ -22,6 +26,7 @@ interface CliOptions {
   outputDir: string;
   cachePath: string;
   enrichmentCachePath: string;
+  overridesPath: string;
   market: string;
   help: boolean;
 }
@@ -34,16 +39,23 @@ if (options.help) {
 }
 
 try {
-  const stageThree = await readStageThreeArtifacts(options.inputDir);
+  const [stageThree, overrides] = await Promise.all([
+    readStageThreeArtifacts(options.inputDir),
+    readManualAlbumResolutionOverrides(options.overridesPath),
+  ]);
   const cached = await createCachedSpotifyCatalogProvider({
     cachePath: options.cachePath,
     market: options.market,
   });
-  const resolution = await resolveAlbumCatalog({
+  const automaticResolution = await resolveAlbumCatalog({
     artifacts: stageThree,
     provider: cached.provider,
     providerName: "spotify",
   });
+  const { result: resolution, summary: overrideSummary } = applyManualAlbumResolutionOverrides(
+    automaticResolution,
+    overrides,
+  );
   const cachedEnrichment = await createCachedSpotifyEnrichmentProvider({
     cachePath: options.enrichmentCachePath,
     market: options.market,
@@ -83,6 +95,9 @@ try {
   console.log(`Resolved source albums: ${preview.manifest.totals.resolved_source_albums}/${preview.manifest.totals.source_albums}`);
   console.log(`Canonical albums: ${preview.manifest.totals.canonical_albums}`);
   console.log(`Preview Library members: ${preview.manifest.totals.library_members}`);
+  console.log(`Manual resolution overrides applied: ${overrideSummary.applied}`);
+  console.log(`Manual resolution overrides already resolved: ${overrideSummary.alreadyResolved}`);
+  console.log(`Manual resolution override orphans: ${overrideSummary.orphanSourceAlbumKeys.length}`);
   console.log("");
   console.log(renderArchiveReconciliationReportMarkdown(preview.result.report));
   console.log(`\nPreview outputs written only to ${options.outputDir}`);
@@ -98,6 +113,7 @@ function parseArgs(args: string[]): CliOptions {
     outputDir: path.join(defaultInput, "preview"),
     cachePath: path.join(defaultInput, "spotify-resolution-cache.json"),
     enrichmentCachePath: path.join(defaultInput, "spotify-enrichment-cache.json"),
+    overridesPath: path.resolve("data/history/album-resolution-overrides.json"),
     market: (process.env.SPOTIFY_MARKET ?? "US").toUpperCase(),
     help: false,
   };
@@ -127,6 +143,10 @@ function parseArgs(args: string[]): CliOptions {
       parsed.enrichmentCachePath = path.resolve(requireValue(args, ++index, "--enrichment-cache"));
       continue;
     }
+    if (arg === "--overrides") {
+      parsed.overridesPath = path.resolve(requireValue(args, ++index, "--overrides"));
+      continue;
+    }
     if (arg === "--market") {
       parsed.market = requireValue(args, ++index, "--market").toUpperCase();
       continue;
@@ -144,5 +164,5 @@ function requireValue(args: string[], index: number, option: string): string {
 }
 
 function printHelp(): void {
-  console.log(`Needle cached archive preview\n\nUsage:\n  npm run history:preview-cached -- [options]\n\nOptions:\n  --input <dir>              Existing 1.03/private artifact directory (default: data/history/.needle)\n  --output <dir>             Preview output directory (default: <input>/preview)\n  --cache <file>             Existing Spotify resolution cache (default: <input>/spotify-resolution-cache.json)\n  --enrichment-cache <file>  Existing partial Spotify enrichment cache (default: <input>/spotify-enrichment-cache.json)\n  --market <CC>              Cache market (default: SPOTIFY_MARKET or US)\n  --help                     Show this help\n\nThis command is cache-only: it does not use Spotify credentials or make network requests.\nPreview outputs are local-only and must not be loaded into remote/production D1.`);
+  console.log(`Needle cached archive preview\n\nUsage:\n  npm run history:preview-cached -- [options]\n\nOptions:\n  --input <dir>              Existing 1.03/private artifact directory (default: data/history/.needle)\n  --output <dir>             Preview output directory (default: <input>/preview)\n  --cache <file>             Existing Spotify resolution cache (default: <input>/spotify-resolution-cache.json)\n  --enrichment-cache <file>  Existing Spotify enrichment cache (default: <input>/spotify-enrichment-cache.json)\n  --overrides <file>         Persistent local album review approvals (default: data/history/album-resolution-overrides.json)\n  --market <CC>              Cache market (default: SPOTIFY_MARKET or US)\n  --help                     Show this help\n\nThis command is cache-only: it does not use Spotify credentials or make network requests.\nPreview outputs are local-only and must not be loaded into remote/production D1.`);
 }

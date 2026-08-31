@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 
 const layout = readFileSync("app/layout.tsx", "utf8");
 const globals = readFileSync("app/globals.css", "utf8");
-const library = readFileSync("app/library/library.module.css", "utf8");
+const nav = readFileSync("app/nav.css", "utf8");
+const explore = readFileSync("app/explore/explore.module.css", "utf8");
 const album = readFileSync("app/album/[albumId]/album.module.css", "utf8");
 const history = readFileSync("app/history/history.module.css", "utf8");
 
@@ -15,18 +16,20 @@ describe("responsive structural contract", () => {
     expect(globals).toContain("textarea:focus-visible");
   });
 
-  it("keeps mobile primary navigation scroll-safe and touch-sized", () => {
+  it("keeps mobile primary navigation scroll-safe, three-up, and touch-sized", () => {
     expect(globals).toContain(".site-nav__link");
     expect(globals).toContain("min-height: 44px");
     expect(globals).toContain("overflow-x: auto");
     expect(globals).toContain("overscroll-behavior-inline: contain");
+    expect(nav).toContain("grid-template-columns: repeat(3, minmax(0, 1fr))");
   });
 
-  it("keeps Library usable at narrow phone widths", () => {
-    expect(library).toContain("@media (max-width: 480px)");
-    expect(library).toContain(".libraryFilterBar");
-    expect(library).toContain("grid-template-columns: 1fr");
-    expect(library).toContain("min-height: 44px");
+  it("keeps Explore archive browsing usable at narrow phone widths", () => {
+    expect(explore).toContain("@media (max-width: 720px)");
+    expect(explore).toContain(".archiveControls");
+    expect(explore).toContain("grid-template-columns: repeat(2, minmax(0, 1fr))");
+    expect(explore).toContain(".archiveGrid");
+    expect(explore).toContain("min-height: 44px");
   });
 
   it("keeps personal album controls touch-sized and Review width-bounded", () => {

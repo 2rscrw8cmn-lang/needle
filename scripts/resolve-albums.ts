@@ -6,6 +6,10 @@ import {
   writeAlbumResolutionOutputs,
 } from "../lib/import/album-resolver.ts";
 import {
+  applyManualAlbumResolutionOverrides,
+  readManualAlbumResolutionOverrides,
+} from "../lib/import/album-resolution-overrides.ts";
+import {
   createFixtureSpotifyCatalogProvider,
   createLiveSpotifyCatalogProvider,
   type LiveSpotifyCatalogProviderHandle,
@@ -27,8 +31,11 @@ Options:
   --output <dir>           Resolution output directory (default: same as --input)
   --market <CC>            Spotify market (default: SPOTIFY_MARKET or US)
   --cache <file>           Spotify catalog cache (default: <input>/spotify-resolution-cache.json)
+  --overrides <file>       Persistent local review approvals (default: data/history/album-resolution-overrides.json)
   --catalog-fixture <file> Use a sanitized local catalog fixture instead of Spotify API
   --help                   Show this help
+
+The optional override file may only approve high-confidence edition-selection ambiguity already present in Needle's candidate set. It cannot force low-confidence or unmatched albums.
 
 Live Spotify mode requires SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET.
 `);
@@ -47,8 +54,14 @@ async function main(): Promise<void> {
   const cachePath = path.resolve(
     argValue("--cache") ?? path.join(inputDir, "spotify-resolution-cache.json"),
   );
+  const overridesPath = path.resolve(
+    argValue("--overrides") ?? "data/history/album-resolution-overrides.json",
+  );
 
-  const artifacts = await readStageThreeArtifacts(inputDir);
+  const [artifacts, overrides] = await Promise.all([
+    readStageThreeArtifacts(inputDir),
+    readManualAlbumResolutionOverrides(overridesPath),
+  ]);
   let liveProvider: LiveSpotifyCatalogProviderHandle | null = null;
   const provider = fixturePath
     ? await createFixtureSpotifyCatalogProvider(path.resolve(fixturePath))
@@ -59,11 +72,12 @@ async function main(): Promise<void> {
         cachePath,
       }));
 
-  const result = await resolveAlbumCatalog({
+  const automatic = await resolveAlbumCatalog({
     artifacts,
     provider,
     providerName: fixturePath ? "fixture" : "spotify",
   });
+  const { result, summary } = applyManualAlbumResolutionOverrides(automatic, overrides);
 
   const quotaState = liveProvider?.getQuotaState();
   if (quotaState) {
@@ -76,6 +90,15 @@ async function main(): Promise<void> {
   await writeAlbumResolutionOutputs({ outputDir, result });
 
   console.log(renderAlbumResolutionReportMarkdown(result.report));
+  console.log("");
+  console.log("## Manual resolution overrides");
+  console.log(`- Requested: **${summary.requested}**`);
+  console.log(`- Applied: **${summary.applied}**`);
+  console.log(`- Already resolved identically: **${summary.alreadyResolved}**`);
+  console.log(`- Orphan source keys: **${summary.orphanSourceAlbumKeys.length}**`);
+  if (summary.orphanSourceAlbumKeys.length > 0) {
+    for (const sourceKey of summary.orphanSourceAlbumKeys) console.log(`  - ${sourceKey}`);
+  }
   console.log(`\nPrivate album-resolution outputs written to ${outputDir}`);
   if (!result.report.ok) process.exitCode = 1;
 }
