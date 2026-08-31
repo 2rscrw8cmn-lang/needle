@@ -1,13 +1,20 @@
 import { spawn } from "node:child_process";
 
-const command = process.platform === "win32" ? "npm.cmd" : "npm";
-const child = spawn(command, ["run", "dev"], {
-  stdio: "inherit",
-  env: {
-    ...process.env,
-    CLOUDFLARE_ENV: "remote",
-  },
-});
+const env = {
+  ...process.env,
+  CLOUDFLARE_ENV: "remote",
+};
+
+const child =
+  process.platform === "win32"
+    ? spawn(process.env.ComSpec ?? "cmd.exe", ["/d", "/s", "/c", "npm run dev"], {
+        stdio: "inherit",
+        env,
+      })
+    : spawn("npm", ["run", "dev"], {
+        stdio: "inherit",
+        env,
+      });
 
 child.on("error", (error) => {
   console.error(`Needle remote-data dev failed to start: ${error.message}`);
