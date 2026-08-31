@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vinext dev",
+    "dev:remote-data": "node --experimental-strip-types scripts/dev-remote-data.ts",
     "build": "vinext build",
     "preview": "npm run build && wrangler dev --config dist/server/wrangler.json --persist-to .wrangler/state",
     "deploy": "vinext-cloudflare deploy --config dist/server/wrangler.json",
@@ -27,6 +28,8 @@
     "db:migrate:local": "wrangler d1 migrations apply DB --local --persist-to .wrangler/state",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "db:verify:local": "wrangler d1 execute DB --local --persist-to .wrangler/state --command \"SELECT value FROM needle_meta WHERE key = 'schema_version';\"",
+    "db:verify:remote": "wrangler d1 execute DB --remote --command \"SELECT value FROM needle_meta WHERE key = 'schema_version';\"",
+    "db:status:remote": "wrangler d1 execute DB --remote --command \"SELECT (SELECT COUNT(*) FROM albums WHERE is_current = 1) AS current_albums, (SELECT COUNT(*) FROM listener_album_summaries WHERE archive_member = 1) AS archive_members, (SELECT COUNT(*) FROM albums WHERE is_current = 1 AND artwork_url IS NOT NULL) AS albums_with_artwork, (SELECT COUNT(*) FROM album_sessions) AS album_sessions;\"",
     "db:load-archive:local": "wrangler d1 execute DB --local --persist-to .wrangler/state --file data/history/.needle/archive-import.sql",
     "db:load-archive:remote": "wrangler d1 execute DB --remote --file data/history/.needle/archive-import.sql",
     "db:load-preview:local": "wrangler d1 execute DB --local --persist-to .wrangler/state --file data/history/.needle/preview/archive-import.sql"
